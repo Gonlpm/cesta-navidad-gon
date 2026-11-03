@@ -1,0 +1,214 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>III Cesta de Navidad de Gon</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #f8f5ed;
+    color: #26382e;
+}
+
+header {
+    background: linear-gradient(135deg, #103b2d, #236044);
+    color: white;
+    text-align: center;
+    padding: 65px 20px;
+    border-bottom: 5px solid #d6b56d;
+}
+
+header h1 {
+    font-family: Georgia, serif;
+    font-size: 42px;
+    margin: 15px 0;
+}
+
+header p {
+    color: #f1dca7;
+    font-size: 17px;
+}
+
+nav {
+    background: #102e24;
+    padding: 15px;
+    text-align: center;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    margin: 10px;
+    font-weight: bold;
+}
+
+main {
+    max-width: 1050px;
+    margin: auto;
+    padding: 35px 18px;
+}
+
+.intro {
+    text-align: center;
+    margin-bottom: 35px;
+}
+
+.intro h2 {
+    color: #174b35;
+    font-family: Georgia, serif;
+    font-size: 30px;
+    margin-bottom: 12px;
+}
+
+.sorteos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 25px;
+}
+
+.sorteo {
+    background: white;
+    border-radius: 16px;
+    padding: 30px;
+    text-align: center;
+    border: 1px solid #e7d9b9;
+    box-shadow: 0 5px 18px #00000012;
+}
+
+.sorteo h3 {
+    color: #174b35;
+    font-family: Georgia, serif;
+    font-size: 25px;
+    margin: 15px 0;
+}
+
+.sorteo .icono {
+    font-size: 55px;
+}
+
+.precio {
+    color: #a52d36;
+    font-size: 27px;
+    font-weight: bold;
+    margin: 15px;
+}
+
+button {
+    background: #174b35;
+    color: white;
+    border: none;
+    padding: 14px 22px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 15px;
+}
+
+button:hover {
+    background: #a52d36;
+}
+
+.info {
+    text-align: center;
+    margin-top: 40px;
+    padding: 25px;
+    background: #eee7d7;
+    border-radius: 12px;
+}
+
+footer {
+    background: #102e24;
+    color: white;
+    text-align: center;
+    padding: 25px;
+    margin-top: 40px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <p>III EDICIÓN · NAVIDAD 2026</p>
+    <h1>🎄 LA CESTA DE NAVIDAD DE GON 🎄</h1>
+    <p>¡Participa y consigue tu papeleta!</p>
+</header>
+
+<nav>
+    <a href="#inicio">Inicio</a>
+    <a href="#sorteos">Sorteos</a>
+    <a href="#contacto">Contacto</a>
+</nav>
+
+<main id="inicio">
+
+<section class="intro">
+    <h2>¡Bienvenido a la III Edición!</h2>
+    <p>Este año contamos con dos sorteos completamente independientes.</p>
+    <p>Elige dónde quieres participar.</p>
+</section>
+
+<section class="sorteos" id="sorteos">
+
+    <article class="sorteo">
+        <div class="icono">🎁</div>
+        <h3>SORTEO CHOPERA 55</h3>
+        <p>Premio: Cesta de Navidad</p>
+        <div class="precio">2 €</div>
+        <p>Por papeleta</p>
+        <p>1.000 papeletas disponibles</p>
+        <p>Sorteo: 25 de diciembre de 2026</p>
+
+        <button onclick="entrarSorteo('Chopera 55')">
+            PARTICIPAR
+        </button>
+    </article>
+
+    <article class="sorteo">
+        <div class="icono">🎄</div>
+        <h3>SORTEO PEZ AUSTRAL 14</h3>
+        <p>Segundo sorteo independiente</p>
+        <div class="precio">PRÓXIMAMENTE</div>
+        <p>Condiciones por confirmar</p>
+
+        <button onclick="entrarSorteo('C/ Pez Austral 14')">
+            MÁS INFORMACIÓN
+        </button>
+    </article>
+
+</section>
+
+<section class="info" id="contacto">
+    <h2>La Cesta de Navidad de Gon</h2>
+    <p>III Edición · Navidad 2026</p>
+    <p>¡Mucha suerte a todos!</p>
+</section>
+
+</main>
+
+<footer>
+    <p>© 2026 · La Cesta de Navidad de Gon</p>
+</footer>
+
+<script>
+function entrarSorteo(sorteo) {
+    if (sorteo === "Chopera 55") {
+        alert("Bienvenido al sorteo Chopera 55. ¡Próximamente podrás comprar tus papeletas!");
+    } else {
+        alert("El sorteo de C/ Pez Austral 14 estará disponible próximamente.");
+    }
+}
+</script>
+
+</body>
+</html>

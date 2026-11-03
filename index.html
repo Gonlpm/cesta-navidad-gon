@@ -4,211 +4,219 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>III Cesta de Navidad de Gon</title>
-
+<title>III Edición · La Cesta de Navidad de Gon</title>
 <style>
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+:root {
+  --verde:#123d2b;
+  --verde2:#1d6042;
+  --dorado:#d6ad55;
+  --rojo:#a92828;
+  --crema:#fffaf0;
 }
-
+* {box-sizing:border-box}
 body {
-    font-family: Arial, sans-serif;
-    background: #f8f5ed;
-    color: #26382e;
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:var(--crema);
+  color:#24352b;
 }
-
 header {
-    background: linear-gradient(135deg, #103b2d, #236044);
-    color: white;
-    text-align: center;
-    padding: 65px 20px;
-    border-bottom: 5px solid #d6b56d;
+  background:var(--verde);
+  color:white;
+  text-align:center;
+  padding:35px 15px;
+  border-bottom:5px solid var(--dorado);
 }
-
-header h1 {
-    font-family: Georgia, serif;
-    font-size: 42px;
-    margin: 15px 0;
-}
-
-header p {
-    color: #f1dca7;
-    font-size: 17px;
-}
-
+header p {color:#f1d58d;letter-spacing:3px}
+h1 {font-size:clamp(27px,5vw,43px)}
 nav {
-    background: #102e24;
-    padding: 15px;
-    text-align: center;
+  background:#0c3021;
+  padding:14px;
+  text-align:center;
 }
-
 nav a {
-    color: white;
-    text-decoration: none;
-    margin: 10px;
-    font-weight: bold;
+  color:white;
+  text-decoration:none;
+  margin:0 15px;
 }
-
-main {
-    max-width: 1050px;
-    margin: auto;
-    padding: 35px 18px;
-}
-
-.intro {
-    text-align: center;
-    margin-bottom: 35px;
-}
-
-.intro h2 {
-    color: #174b35;
-    font-family: Georgia, serif;
-    font-size: 30px;
-    margin-bottom: 12px;
-}
-
-.sorteos {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 25px;
-}
-
+main {max-width:950px;margin:auto;padding:25px 15px}
+.intro{text-align:center;margin:35px 0}
 .sorteo {
-    background: white;
-    border-radius: 16px;
-    padding: 30px;
-    text-align: center;
-    border: 1px solid #e7d9b9;
-    box-shadow: 0 5px 18px #00000012;
+  background:white;
+  border:2px solid var(--dorado);
+  border-radius:15px;
+  padding:25px;
+  margin:25px 0;
+  box-shadow:0 5px 15px #00000012;
 }
-
-.sorteo h3 {
-    color: #174b35;
-    font-family: Georgia, serif;
-    font-size: 25px;
-    margin: 15px 0;
-}
-
-.sorteo .icono {
-    font-size: 55px;
-}
-
-.precio {
-    color: #a52d36;
-    font-size: 27px;
-    font-weight: bold;
-    margin: 15px;
-}
-
+.sorteo h2 {color:var(--verde)}
+.precio {font-size:28px;color:var(--rojo);font-weight:bold}
 button {
-    background: #174b35;
-    color: white;
-    border: none;
-    padding: 14px 22px;
-    border-radius: 8px;
-    font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
-    margin-top: 15px;
+  background:var(--rojo);
+  color:white;
+  border:0;
+  padding:14px 22px;
+  border-radius:8px;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
 }
-
-button:hover {
-    background: #a52d36;
+button:hover {background:#7f1919}
+#formulario {
+  display:none;
+  background:white;
+  border:2px solid var(--dorado);
+  border-radius:15px;
+  padding:25px;
+  margin:30px 0;
 }
-
-.info {
-    text-align: center;
-    margin-top: 40px;
-    padding: 25px;
-    background: #eee7d7;
-    border-radius: 12px;
+label {display:block;font-weight:bold;margin-top:16px}
+input,select {
+  width:100%;
+  padding:12px;
+  margin-top:7px;
+  border:1px solid #bbb;
+  border-radius:7px;
+  font-size:16px;
 }
-
+.total {
+  background:#f4edda;
+  padding:15px;
+  margin:20px 0;
+  border-radius:8px;
+  font-size:20px;
+}
+.aviso {font-size:13px;color:#666;line-height:1.5}
 footer {
-    background: #102e24;
-    color: white;
-    text-align: center;
-    padding: 25px;
-    margin-top: 40px;
+  background:var(--verde);
+  color:white;
+  text-align:center;
+  padding:25px;
+  margin-top:40px;
 }
 </style>
 </head>
-
 <body>
 
 <header>
-    <p>III EDICIÓN · NAVIDAD 2026</p>
-    <h1>🎄 LA CESTA DE NAVIDAD DE GON 🎄</h1>
-    <p>¡Participa y consigue tu papeleta!</p>
+  <p>III EDICIÓN · NAVIDAD 2026</p>
+  <h1>🎄 LA CESTA DE NAVIDAD DE GON 🎄</h1>
+  <p>¡La ilusión de la Navidad puede ser tuya!</p>
 </header>
 
 <nav>
-    <a href="#inicio">Inicio</a>
-    <a href="#sorteos">Sorteos</a>
-    <a href="#contacto">Contacto</a>
+  <a href="#inicio">Inicio</a>
+  <a href="#sorteos">Sorteos</a>
+  <a href="#contacto">Contacto</a>
 </nav>
 
 <main id="inicio">
+  <section class="intro">
+    <h2>¡Bienvenido a nuestra III Edición!</h2>
+    <p>Participa y consigue tu papeleta para nuestros sorteos navideños.</p>
+  </section>
 
-<section class="intro">
-    <h2>¡Bienvenido a la III Edición!</h2>
-    <p>Este año contamos con dos sorteos completamente independientes.</p>
-    <p>Elige dónde quieres participar.</p>
-</section>
-
-<section class="sorteos" id="sorteos">
-
+  <section id="sorteos">
     <article class="sorteo">
-        <div class="icono">🎁</div>
-        <h3>SORTEO CHOPERA 55</h3>
-        <p>Premio: Cesta de Navidad</p>
-        <div class="precio">2 €</div>
-        <p>Por papeleta</p>
-        <p>1.000 papeletas disponibles</p>
-        <p>Sorteo: 25 de diciembre de 2026</p>
-
-        <button onclick="entrarSorteo('Chopera 55')">
-            PARTICIPAR
-        </button>
+      <h2>🎁 Sorteo Chopera 55</h2>
+      <p>Premio: Cesta de Navidad</p>
+      <p>Fecha del sorteo: 25 de diciembre de 2026</p>
+      <p>1.000 papeletas disponibles</p>
+      <p class="precio">2 € por papeleta</p>
+      <button onclick="abrirFormulario()">PARTICIPAR</button>
     </article>
 
     <article class="sorteo">
-        <div class="icono">🎄</div>
-        <h3>SORTEO PEZ AUSTRAL 14</h3>
-        <p>Segundo sorteo independiente</p>
-        <div class="precio">PRÓXIMAMENTE</div>
-        <p>Condiciones por confirmar</p>
-
-        <button onclick="entrarSorteo('C/ Pez Austral 14')">
-            MÁS INFORMACIÓN
-        </button>
+      <h2>🎄 Sorteo C/ Pez Austral 14</h2>
+      <p>Próximamente anunciaremos todos los detalles.</p>
+      <button disabled>PRÓXIMAMENTE</button>
     </article>
+  </section>
 
-</section>
+  <section id="formulario">
+    <h2>🎟️ Solicitar papeletas · Chopera 55</h2>
+    <p>Completa tus datos para solicitar tu participación.</p>
 
-<section class="info" id="contacto">
-    <h2>La Cesta de Navidad de Gon</h2>
-    <p>III Edición · Navidad 2026</p>
-    <p>¡Mucha suerte a todos!</p>
-</section>
+    <form id="pedidoForm">
+      <label for="nombre">Nombre y apellidos</label>
+      <input id="nombre" name="nombre" required maxlength="100">
 
+      <label for="telefono">Teléfono</label>
+      <input id="telefono" name="telefono" type="tel" required>
+
+      <label for="email">Correo electrónico</label>
+      <input id="email" name="email" type="email" required>
+
+      <label for="cantidad">Cantidad de papeletas</label>
+      <input id="cantidad" name="cantidad" type="number"
+        min="1" max="1000" value="1" required>
+
+      <label for="pago">Método de pago</label>
+      <select id="pago" name="pago" required>
+        <option value="">Selecciona una opción</option>
+        <option value="Bizum">Bizum</option>
+        <option value="Efectivo">Efectivo</option>
+      </select>
+
+      <div class="total">
+        Total: <strong id="total">2 €</strong>
+      </div>
+
+      <button type="submit">ENVIAR SOLICITUD</button>
+      <p class="aviso">
+        El envío de esta solicitud no confirma la compra ni reserva
+        números de papeleta. El administrador deberá revisar y confirmar
+        el pago. Antes de activar el formulario para el público,
+        habrá que incorporar la información de privacidad correspondiente.
+      </p>
+    </form>
+    <div id="resultado" hidden></div>
+  </section>
 </main>
 
-<footer>
-    <p>© 2026 · La Cesta de Navidad de Gon</p>
+<footer id="contacto">
+  <h3>🎄 La Cesta de Navidad de Gon 🎄</h3>
+  <p>III Edición · Navidad 2026</p>
 </footer>
 
 <script>
-function entrarSorteo(sorteo) {
-    if (sorteo === "Chopera 55") {
-        alert("Bienvenido al sorteo Chopera 55. ¡Próximamente podrás comprar tus papeletas!");
-    } else {
-        alert("El sorteo de C/ Pez Austral 14 estará disponible próximamente.");
-    }
+function abrirFormulario() {
+  document.getElementById("formulario").style.display = "block";
+  document.getElementById("formulario").scrollIntoView({
+    behavior:"smooth"
+  });
 }
-</script>
 
+const cantidad = document.getElementById("cantidad");
+const total = document.getElementById("total");
+
+cantidad.addEventListener("input", function() {
+  let numero = Math.max(1, Math.min(1000, Number(cantidad.value) || 1));
+  total.textContent = (numero * 2).toFixed(2) + " €";
+});
+
+document.getElementById("pedidoForm").addEventListener("submit", function(e) {
+  e.preventDefault();
+
+  const datos = new FormData(this);
+  const numero = Number(datos.get("cantidad"));
+
+  if (!Number.isInteger(numero) || numero < 1 || numero > 1000) {
+    alert("Introduce una cantidad entre 1 y 1000.");
+    return;
+  }
+
+  document.getElementById("resultado").hidden = false;
+  document.getElementById("resultado").innerHTML =
+    "<h3>¡Solicitud preparada!</h3>" +
+    "<p>Tu solicitud es de " + numero +
+    " papeleta(s), por un total de " + (numero * 2) +
+    " €.</p><p>Este formulario todavía no envía los datos al administrador. " +
+    "La conexión segura de pedidos se instalará en el siguiente paso.</p>";
+
+  this.reset();
+  total.textContent = "2 €";
+});
+</script>
 </body>
 </html>

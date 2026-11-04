@@ -4,219 +4,422 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>III Edición · La Cesta de Navidad de Gon</title>
+<title>III Edición · Cesta de Navidad de Gon</title>
 <style>
 :root {
-  --verde:#123d2b;
-  --verde2:#1d6042;
-  --dorado:#d6ad55;
-  --rojo:#a92828;
-  --crema:#fffaf0;
+  --rojo: #8e1725;
+  --verde: #174b35;
+  --oro: #d6ad58;
+  --crema: #fffaf0;
 }
-* {box-sizing:border-box}
+* { box-sizing: border-box; }
 body {
-  margin:0;
-  font-family:Arial,sans-serif;
-  background:var(--crema);
-  color:#24352b;
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: var(--crema);
+  color: #29251f;
 }
 header {
-  background:var(--verde);
-  color:white;
-  text-align:center;
-  padding:35px 15px;
-  border-bottom:5px solid var(--dorado);
+  background: linear-gradient(120deg, #64101b, #a52b35);
+  color: white;
+  text-align: center;
+  padding: 42px 18px;
+  border-bottom: 5px solid var(--oro);
 }
-header p {color:#f1d58d;letter-spacing:3px}
-h1 {font-size:clamp(27px,5vw,43px)}
+header h1 { margin: 0 0 10px; font-size: 30px; }
+header p { margin: 6px; }
 nav {
-  background:#0c3021;
-  padding:14px;
-  text-align:center;
+  background: var(--verde);
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px;
 }
 nav a {
-  color:white;
-  text-decoration:none;
-  margin:0 15px;
+  color: white;
+  text-decoration: none;
+  padding: 10px 14px;
+  border-radius: 6px;
 }
-main {max-width:950px;margin:auto;padding:25px 15px}
-.intro{text-align:center;margin:35px 0}
-.sorteo {
-  background:white;
-  border:2px solid var(--dorado);
-  border-radius:15px;
-  padding:25px;
-  margin:25px 0;
-  box-shadow:0 5px 15px #00000012;
+nav a:hover { background: #28684b; }
+main { max-width: 1050px; margin: auto; padding: 22px; }
+section { margin: 28px 0; }
+h2 { color: var(--rojo); }
+.card {
+  background: white;
+  border: 1px solid #eadfc9;
+  border-radius: 14px;
+  padding: 22px;
+  margin: 14px 0;
+  box-shadow: 0 3px 12px #0000000b;
 }
-.sorteo h2 {color:var(--verde)}
-.precio {font-size:28px;color:var(--rojo);font-weight:bold}
-button {
-  background:var(--rojo);
-  color:white;
-  border:0;
-  padding:14px 22px;
-  border-radius:8px;
-  font-size:16px;
-  font-weight:bold;
-  cursor:pointer;
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
 }
-button:hover {background:#7f1919}
-#formulario {
-  display:none;
-  background:white;
-  border:2px solid var(--dorado);
-  border-radius:15px;
-  padding:25px;
-  margin:30px 0;
+button, .boton {
+  display: inline-block;
+  border: 0;
+  border-radius: 8px;
+  padding: 12px 18px;
+  background: var(--rojo);
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  text-decoration: none;
 }
-label {display:block;font-weight:bold;margin-top:16px}
-input,select {
-  width:100%;
-  padding:12px;
-  margin-top:7px;
-  border:1px solid #bbb;
-  border-radius:7px;
-  font-size:16px;
+button:hover, .boton:hover { opacity: .9; }
+button:disabled { opacity: .5; cursor: not-allowed; }
+.verde { background: var(--verde); }
+input, select {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  margin: 7px 0 15px;
+  border: 1px solid #cfc5b4;
+  border-radius: 7px;
+  font-size: 16px;
 }
-.total {
-  background:#f4edda;
-  padding:15px;
-  margin:20px 0;
-  border-radius:8px;
-  font-size:20px;
+label { font-weight: bold; }
+.precio {
+  color: var(--verde);
+  font-size: 22px;
+  font-weight: bold;
 }
-.aviso {font-size:13px;color:#666;line-height:1.5}
+.productos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 14px;
+}
+.producto {
+  background: white;
+  border: 1px solid #eadfc9;
+  border-radius: 12px;
+  padding: 12px;
+}
+.producto img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+.aviso {
+  background: #fff4dc;
+  border-left: 4px solid var(--oro);
+  padding: 12px;
+  border-radius: 5px;
+}
+#resultado {
+  margin-top: 16px;
+  padding: 12px;
+  border-radius: 8px;
+  display: none;
+}
 footer {
-  background:var(--verde);
-  color:white;
-  text-align:center;
-  padding:25px;
-  margin-top:40px;
+  background: var(--verde);
+  color: white;
+  text-align: center;
+  padding: 25px;
+  margin-top: 40px;
 }
+small { color: #6c6257; }
 </style>
 </head>
+
 <body>
 
 <header>
-  <p>III EDICIÓN · NAVIDAD 2026</p>
-  <h1>🎄 LA CESTA DE NAVIDAD DE GON 🎄</h1>
+  <h1>🎄 III Edición de la Cesta de Navidad de Gon 🎄</h1>
   <p>¡La ilusión de la Navidad puede ser tuya!</p>
+  <p>Dos sorteos independientes · Navidad 2026</p>
 </header>
 
 <nav>
   <a href="#inicio">Inicio</a>
   <a href="#sorteos">Sorteos</a>
-  <a href="#contacto">Contacto</a>
+  <a href="#productos">Productos</a>
+  <a href="#comprar">Comprar papeletas</a>
 </nav>
 
-<main id="inicio">
-  <section class="intro">
-    <h2>¡Bienvenido a nuestra III Edición!</h2>
-    <p>Participa y consigue tu papeleta para nuestros sorteos navideños.</p>
-  </section>
+<main>
 
-  <section id="sorteos">
-    <article class="sorteo">
-      <h2>🎁 Sorteo Chopera 55</h2>
+<section id="inicio">
+  <div class="card">
+    <h2>¡Bienvenido!</h2>
+    <p>Bienvenido a la III Edición de la Cesta de Navidad de Gon.
+    Elige uno de nuestros dos sorteos y descubre los productos
+    que forman parte de cada cesta.</p>
+  </div>
+</section>
+
+<section id="sorteos">
+  <h2>🎁 Nuestros sorteos</h2>
+  <div class="cards">
+
+    <div class="card">
+      <h3>🎄 Chopera 55</h3>
       <p>Premio: Cesta de Navidad</p>
-      <p>Fecha del sorteo: 25 de diciembre de 2026</p>
-      <p>1.000 papeletas disponibles</p>
       <p class="precio">2 € por papeleta</p>
-      <button onclick="abrirFormulario()">PARTICIPAR</button>
-    </article>
+      <p>1.000 papeletas disponibles inicialmente.</p>
+      <p>Fecha del sorteo: 25 de diciembre de 2026.</p>
+      <button onclick="seleccionarSorteo('Chopera 55')">
+        Ver este sorteo
+      </button>
+    </div>
 
-    <article class="sorteo">
-      <h2>🎄 Sorteo C/ Pez Austral 14</h2>
-      <p>Próximamente anunciaremos todos los detalles.</p>
-      <button disabled>PRÓXIMAMENTE</button>
-    </article>
-  </section>
+    <div class="card">
+      <h3>🎄 C/ Pez Austral 14</h3>
+      <p>Segundo sorteo independiente.</p>
+      <p>Su configuración se publicará próximamente.</p>
+      <button class="verde" onclick="alert('Este sorteo estará disponible próximamente.')">
+        Próximamente
+      </button>
+    </div>
 
-  <section id="formulario">
-    <h2>🎟️ Solicitar papeletas · Chopera 55</h2>
-    <p>Completa tus datos para solicitar tu participación.</p>
+  </div>
+</section>
+
+<section id="productos">
+  <h2>🛍️ Productos de las cestas</h2>
+  <p>Descubre los productos incluidos en cada cesta de Navidad.</p>
+
+  <div class="card">
+    <h3>Productos · Chopera 55</h3>
+    <div id="productos-chopera" class="productos"></div>
+  </div>
+
+  <div class="card">
+    <h3>Productos · C/ Pez Austral 14</h3>
+    <div id="productos-pez" class="productos"></div>
+  </div>
+
+  <p class="aviso">
+    Los productos se añadirán a partir del 1 de diciembre.
+  </p>
+</section>
+
+<section id="comprar">
+  <h2>🎟️ Comprar papeletas</h2>
+  <div class="card">
+    <h3 id="tituloCompra">Sorteo: Chopera 55</h3>
+
+    <p>Rellena tus datos para solicitar tus papeletas.
+    Tu pedido quedará pendiente hasta que se compruebe el pago.</p>
 
     <form id="pedidoForm">
+      <input type="hidden" id="sorteo" value="Chopera 55">
+
       <label for="nombre">Nombre y apellidos</label>
-      <input id="nombre" name="nombre" required maxlength="100">
+      <input id="nombre" type="text" required maxlength="120">
 
       <label for="telefono">Teléfono</label>
-      <input id="telefono" name="telefono" type="tel" required>
+      <input id="telefono" type="tel" required maxlength="25">
 
       <label for="email">Correo electrónico</label>
-      <input id="email" name="email" type="email" required>
+      <input id="email" type="email" required maxlength="150">
 
-      <label for="cantidad">Cantidad de papeletas</label>
-      <input id="cantidad" name="cantidad" type="number"
-        min="1" max="1000" value="1" required>
+      <label for="cantidad">Número de papeletas</label>
+      <input id="cantidad" type="number" min="1" max="1000"
+             value="1" required>
 
-      <label for="pago">Método de pago</label>
-      <select id="pago" name="pago" required>
-        <option value="">Selecciona una opción</option>
+      <label for="pago">Forma de pago</label>
+      <select id="pago" required>
         <option value="Bizum">Bizum</option>
         <option value="Efectivo">Efectivo</option>
       </select>
 
-      <div class="total">
-        Total: <strong id="total">2 €</strong>
-      </div>
+      <label>
+        <input id="papel" type="checkbox"
+               style="display:inline;width:auto">
+        Quiero solicitar también mi papeleta en papel.
+      </label>
 
-      <button type="submit">ENVIAR SOLICITUD</button>
-      <p class="aviso">
-        El envío de esta solicitud no confirma la compra ni reserva
-        números de papeleta. El administrador deberá revisar y confirmar
-        el pago. Antes de activar el formulario para el público,
-        habrá que incorporar la información de privacidad correspondiente.
-      </p>
+      <p>Total: <span class="precio" id="total">2,00 €</span></p>
+
+      <button id="enviar" type="submit">ENVIAR SOLICITUD</button>
     </form>
-    <div id="resultado" hidden></div>
-  </section>
+
+    <div id="resultado"></div>
+    <small>Enviar la solicitud no significa que el pago esté confirmado
+    ni que tengas asignado un número de papeleta.</small>
+  </div>
+</section>
+
+<section>
+  <div class="card">
+    <h2>📩 ¿Tienes alguna duda?</h2>
+    <p>Para consultas sobre los sorteos, ponte en contacto con la
+    organización de la Cesta de Navidad de Gon.</p>
+  </div>
+</section>
+
 </main>
 
-<footer id="contacto">
-  <h3>🎄 La Cesta de Navidad de Gon 🎄</h3>
-  <p>III Edición · Navidad 2026</p>
+<footer>
+  <p>🎄 III Edición de la Cesta de Navidad de Gon 🎄</p>
+  <p>Chopera 55 · C/ Pez Austral 14</p>
+  <small>© 2026 · Todos los derechos reservados</small>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
-function abrirFormulario() {
-  document.getElementById("formulario").style.display = "block";
-  document.getElementById("formulario").scrollIntoView({
-    behavior:"smooth"
-  });
-}
+// 1. CONFIGURACIÓN DE SUPABASE
+const SUPABASE_URL = "https://dfbsbbzvxuqypeowtvld.supabase.co";
+const SUPABASE_ANON_KEY = "PEGA_AQUI_TU_CLAVE_PUBLICA";
 
-const cantidad = document.getElementById("cantidad");
-const total = document.getElementById("total");
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
 
-cantidad.addEventListener("input", function() {
-  let numero = Math.max(1, Math.min(1000, Number(cantidad.value) || 1));
-  total.textContent = (numero * 2).toFixed(2) + " €";
-});
+// 2. PRODUCTOS
+// El 1 de diciembre añadiremos aquí los productos de cada cesta.
+// Ejemplo:
+// { nombre: "Turrón", descripcion: "Turrón de Navidad",
+//   imagen: "URL_DE_LA_FOTO" }
 
-document.getElementById("pedidoForm").addEventListener("submit", function(e) {
-  e.preventDefault();
+const productosChopera = [];
+const productosPez = [];
 
-  const datos = new FormData(this);
-  const numero = Number(datos.get("cantidad"));
+function mostrarProductos(lista, contenedorId) {
+  const contenedor = document.getElementById(contenedorId);
 
-  if (!Number.isInteger(numero) || numero < 1 || numero > 1000) {
-    alert("Introduce una cantidad entre 1 y 1000.");
+  if (lista.length === 0) {
+    contenedor.innerHTML =
+      "<p>🎁 Los productos de esta cesta se publicarán próximamente.</p>";
     return;
   }
 
-  document.getElementById("resultado").hidden = false;
-  document.getElementById("resultado").innerHTML =
-    "<h3>¡Solicitud preparada!</h3>" +
-    "<p>Tu solicitud es de " + numero +
-    " papeleta(s), por un total de " + (numero * 2) +
-    " €.</p><p>Este formulario todavía no envía los datos al administrador. " +
-    "La conexión segura de pedidos se instalará en el siguiente paso.</p>";
+  contenedor.innerHTML = "";
 
-  this.reset();
-  total.textContent = "2 €";
-});
+  lista.forEach(producto => {
+    const tarjeta = document.createElement("div");
+    tarjeta.className = "producto";
+
+    const imagen = document.createElement("img");
+    imagen.src = producto.imagen;
+    imagen.alt = producto.nombre;
+
+    const nombre = document.createElement("h4");
+    nombre.textContent = producto.nombre;
+
+    const descripcion = document.createElement("p");
+    descripcion.textContent = producto.descripcion || "";
+
+    tarjeta.append(imagen, nombre, descripcion);
+    contenedor.appendChild(tarjeta);
+  });
+}
+
+mostrarProductos(productosChopera, "productos-chopera");
+mostrarProductos(productosPez, "productos-pez");
+
+// 3. SELECCIONAR SORTEO
+function seleccionarSorteo(nombre) {
+  if (nombre !== "Chopera 55") {
+    alert("Este sorteo todavía no está disponible para compras.");
+    return;
+  }
+
+  document.getElementById("sorteo").value = nombre;
+  document.getElementById("tituloCompra").textContent =
+    "Sorteo: " + nombre;
+
+  document.getElementById("comprar").scrollIntoView({
+    behavior: "smooth"
+  });
+}
+
+// 4. CALCULAR EL TOTAL
+const cantidadInput = document.getElementById("cantidad");
+const totalTexto = document.getElementById("total");
+
+function actualizarTotal() {
+  let cantidad = Number(cantidadInput.value);
+
+  if (!Number.isInteger(cantidad) || cantidad < 1) cantidad = 1;
+  if (cantidad > 1000) cantidad = 1000;
+
+  totalTexto.textContent =
+    (cantidad * 2).toFixed(2).replace(".", ",") + " €";
+}
+
+cantidadInput.addEventListener("input", actualizarTotal);
+
+// 5. ENVIAR PEDIDO A SUPABASE
+document.getElementById("pedidoForm").addEventListener(
+  "submit",
+  async function(event) {
+    event.preventDefault();
+
+    const resultado = document.getElementById("resultado");
+    const boton = document.getElementById("enviar");
+
+    const cantidad = Number(cantidadInput.value);
+
+    if (!Number.isInteger(cantidad) || cantidad < 1 || cantidad > 1000) {
+      alert("Introduce una cantidad entre 1 y 1.000.");
+      return;
+    }
+
+    if (SUPABASE_ANON_KEY === "sb_publishable_TMJmvhwo-K8fnBhAOGEryg_XWHetqoZ") {
+      alert("Primero tienes que poner tu clave pública de Supabase.");
+      return;
+    }
+
+    boton.disabled = true;
+    boton.textContent = "ENVIANDO...";
+
+    resultado.style.display = "block";
+    resultado.textContent = "Estamos guardando tu solicitud...";
+
+    const datos = {
+      p_sorteo: document.getElementById("sorteo").value,
+      p_nombre: document.getElementById("nombre").value.trim(),
+      p_telefono: document.getElementById("telefono").value.trim(),
+      p_email: document.getElementById("email").value.trim(),
+      p_cantidad: cantidad,
+      p_metodo_pago: document.getElementById("pago").value,
+      p_solicitar_papel: document.getElementById("papel").checked
+    };
+
+    try {
+      const { data, error } = await supabaseClient.rpc(
+        "crear_pedido",
+        datos
+      );
+
+      if (error) throw error;
+
+      resultado.style.background = "#e5f4e9";
+      resultado.style.color = "#174b35";
+      resultado.textContent =
+        "¡Solicitud recibida! Tu referencia es " + data +
+        ". Tu pedido está pendiente de confirmación del pago. " +
+        "Todavía no tienes números de papeleta asignados.";
+
+      document.getElementById("pedidoForm").reset();
+      cantidadInput.value = 1;
+      actualizarTotal();
+
+    } catch (error) {
+      console.error(error);
+      resultado.style.background = "#fbe5e5";
+      resultado.style.color = "#8e1725";
+      resultado.textContent =
+        "No se ha podido guardar el pedido. Comprueba los datos " +
+        "o inténtalo de nuevo. Error: " + error.message;
+
+    } finally {
+      boton.disabled = false;
+      boton.textContent = "ENVIAR SOLICITUD";
+    }
+  }
+);
 </script>
+
 </body>
 </html>

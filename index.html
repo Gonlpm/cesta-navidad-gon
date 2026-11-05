@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -6,280 +7,177 @@
 <title>III Edición · Cesta de Navidad de Gon</title>
 <style>
 :root {
-  --rojo: #8e1725;
-  --verde: #174b35;
-  --oro: #d6ad58;
-  --crema: #fffaf0;
+  --rojo:#8e1725;
+  --verde:#174b35;
+  --oro:#d6ad58;
+  --crema:#fffaf0;
 }
-* { box-sizing: border-box; }
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: var(--crema);
-  color: #29251f;
-}
-header {
-  background: linear-gradient(120deg, #64101b, #a52b35);
-  color: white;
-  text-align: center;
-  padding: 42px 18px;
-  border-bottom: 5px solid var(--oro);
-}
-header h1 { margin: 0 0 10px; font-size: 30px; }
-header p { margin: 6px; }
-nav {
-  background: var(--verde);
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 12px;
-}
-nav a {
-  color: white;
-  text-decoration: none;
-  padding: 10px 14px;
-  border-radius: 6px;
-}
-nav a:hover { background: #28684b; }
-main { max-width: 1050px; margin: auto; padding: 22px; }
-section { margin: 28px 0; }
-h2 { color: var(--rojo); }
-.card {
-  background: white;
-  border: 1px solid #eadfc9;
-  border-radius: 14px;
-  padding: 22px;
-  margin: 14px 0;
-  box-shadow: 0 3px 12px #0000000b;
-}
-.cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 16px;
-}
-button, .boton {
-  display: inline-block;
-  border: 0;
-  border-radius: 8px;
-  padding: 12px 18px;
-  background: var(--rojo);
-  color: white;
-  font-weight: bold;
-  cursor: pointer;
-  text-decoration: none;
-}
-button:hover, .boton:hover { opacity: .9; }
-button:disabled { opacity: .5; cursor: not-allowed; }
-.verde { background: var(--verde); }
-input, select {
-  display: block;
-  width: 100%;
-  padding: 12px;
-  margin: 7px 0 15px;
-  border: 1px solid #cfc5b4;
-  border-radius: 7px;
-  font-size: 16px;
-}
-label { font-weight: bold; }
-.precio {
-  color: var(--verde);
-  font-size: 22px;
-  font-weight: bold;
-}
-.productos {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-  gap: 14px;
-}
-.producto {
-  background: white;
-  border: 1px solid #eadfc9;
-  border-radius: 12px;
-  padding: 12px;
-}
-.producto img {
-  width: 100%;
-  height: 150px;
-  object-fit: cover;
-  border-radius: 8px;
-}
-.aviso {
-  background: #fff4dc;
-  border-left: 4px solid var(--oro);
-  padding: 12px;
-  border-radius: 5px;
-}
-#resultado {
-  margin-top: 16px;
-  padding: 12px;
-  border-radius: 8px;
-  display: none;
-}
-footer {
-  background: var(--verde);
-  color: white;
-  text-align: center;
-  padding: 25px;
-  margin-top: 40px;
-}
-small { color: #6c6257; }
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:var(--crema);color:#29251f}
+header{background:linear-gradient(120deg,#64101b,#a52b35);color:white;text-align:center;padding:42px 18px;border-bottom:5px solid var(--oro)}
+header h1{margin:0 0 10px;font-size:30px}
+header p{margin:6px}
+nav{background:var(--verde);display:flex;justify-content:center;flex-wrap:wrap;gap:8px;padding:12px}
+nav a{color:white;text-decoration:none;padding:10px 14px;border-radius:6px}
+nav a:hover{background:#28684b}
+main{max-width:1050px;margin:auto;padding:22px}
+section{margin:28px 0}
+h2{color:var(--rojo)}
+.card{background:white;border:1px solid #eadfc9;border-radius:14px;padding:22px;margin:14px 0;box-shadow:0 3px 12px #0000000b}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+button,.boton{display:inline-block;border:0;border-radius:8px;padding:12px 18px;background:var(--rojo);color:white;font-weight:bold;cursor:pointer;text-decoration:none}
+button:hover,.boton:hover{opacity:.9}
+button:disabled{opacity:.5;cursor:not-allowed}
+.verde{background:var(--verde)}
+input,select{display:block;width:100%;padding:12px;margin:7px 0 15px;border:1px solid #cfc5b4;border-radius:7px;font-size:16px}
+label{font-weight:bold}
+.precio{color:var(--verde);font-size:22px;font-weight:bold}
+.productos{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px}
+.producto{background:white;border:1px solid #eadfc9;border-radius:12px;padding:12px}
+.producto img{width:100%;height:150px;object-fit:cover;border-radius:8px}
+.aviso{background:#fff4dc;border-left:4px solid var(--oro);padding:12px;border-radius:5px}
+#resultado{margin-top:16px;padding:12px;border-radius:8px;display:none;overflow-wrap:anywhere}
+footer{background:var(--verde);color:white;text-align:center;padding:25px;margin-top:40px}
+small{color:#6c6257}
 </style>
 </head>
-
 <body>
 
 <header>
-  <h1>🎄 III Edición de la Cesta de Navidad de Gon 🎄</h1>
-  <p>¡La ilusión de la Navidad puede ser tuya!</p>
-  <p>Dos sorteos independientes · Navidad 2026</p>
+<h1>🎄 III Edición de la Cesta de Navidad de Gon 🎄</h1>
+<p>¡La ilusión de la Navidad puede ser tuya!</p>
+<p>Dos sorteos independientes · Navidad 2026</p>
 </header>
 
 <nav>
-  <a href="#inicio">Inicio</a>
-  <a href="#sorteos">Sorteos</a>
-  <a href="#productos">Productos</a>
-  <a href="#comprar">Comprar papeletas</a>
+<a href="#inicio">Inicio</a>
+<a href="#sorteos">Sorteos</a>
+<a href="#productos">Productos</a>
+<a href="#comprar">Comprar papeletas</a>
 </nav>
 
 <main>
-
 <section id="inicio">
-  <div class="card">
-    <h2>¡Bienvenido!</h2>
-    <p>Bienvenido a la III Edición de la Cesta de Navidad de Gon.
-    Elige uno de nuestros dos sorteos y descubre los productos
-    que forman parte de cada cesta.</p>
-  </div>
+<div class="card">
+<h2>¡Bienvenido!</h2>
+<p>Bienvenido a la III Edición de la Cesta de Navidad de Gon.
+Elige uno de nuestros dos sorteos y descubre los productos
+que forman parte de cada cesta.</p>
+</div>
 </section>
 
 <section id="sorteos">
-  <h2>🎁 Nuestros sorteos</h2>
-  <div class="cards">
+<h2>🎁 Nuestros sorteos</h2>
+<div class="cards">
+<div class="card">
+<h3>🎄 Chopera 55</h3>
+<p>Premio: Cesta de Navidad</p>
+<p class="precio">2 € por papeleta</p>
+<p>1.000 papeletas disponibles inicialmente.</p>
+<p>Fecha del sorteo: 25 de diciembre de 2026.</p>
+<button onclick="seleccionarSorteo('Chopera 55')">Ver este sorteo</button>
+</div>
 
-    <div class="card">
-      <h3>🎄 Chopera 55</h3>
-      <p>Premio: Cesta de Navidad</p>
-      <p class="precio">2 € por papeleta</p>
-      <p>1.000 papeletas disponibles inicialmente.</p>
-      <p>Fecha del sorteo: 25 de diciembre de 2026.</p>
-      <button onclick="seleccionarSorteo('Chopera 55')">
-        Ver este sorteo
-      </button>
-    </div>
-
-    <div class="card">
-      <h3>🎄 C/ Pez Austral 14</h3>
-      <p>Segundo sorteo independiente.</p>
-      <p>Su configuración se publicará próximamente.</p>
-      <button class="verde" onclick="alert('Este sorteo estará disponible próximamente.')">
-        Próximamente
-      </button>
-    </div>
-
-  </div>
+<div class="card">
+<h3>🎄 C/ Pez Austral 14</h3>
+<p>Segundo sorteo independiente.</p>
+<p>Su configuración se publicará próximamente.</p>
+<button class="verde" onclick="alert('Este sorteo estará disponible próximamente.')">Próximamente</button>
+</div>
+</div>
 </section>
 
 <section id="productos">
-  <h2>🛍️ Productos de las cestas</h2>
-  <p>Descubre los productos incluidos en cada cesta de Navidad.</p>
-
-  <div class="card">
-    <h3>Productos · Chopera 55</h3>
-    <div id="productos-chopera" class="productos"></div>
-  </div>
-
-  <div class="card">
-    <h3>Productos · C/ Pez Austral 14</h3>
-    <div id="productos-pez" class="productos"></div>
-  </div>
-
-  <p class="aviso">
-    Los productos se añadirán a partir del 1 de diciembre.
-  </p>
+<h2>🛍️ Productos de las cestas</h2>
+<p>Descubre los productos incluidos en cada cesta de Navidad.</p>
+<div class="card">
+<h3>Productos · Chopera 55</h3>
+<div id="productos-chopera" class="productos"></div>
+</div>
+<div class="card">
+<h3>Productos · C/ Pez Austral 14</h3>
+<div id="productos-pez" class="productos"></div>
+</div>
+<p class="aviso">Los productos se añadirán a partir del 1 de diciembre.</p>
 </section>
 
 <section id="comprar">
-  <h2>🎟️ Comprar papeletas</h2>
-  <div class="card">
-    <h3 id="tituloCompra">Sorteo: Chopera 55</h3>
+<h2>🎟️ Comprar papeletas</h2>
+<div class="card">
+<h3 id="tituloCompra">Sorteo: Chopera 55</h3>
+<p>Rellena tus datos para solicitar tus papeletas.
+Tu pedido quedará pendiente hasta que se compruebe el pago.</p>
 
-    <p>Rellena tus datos para solicitar tus papeletas.
-    Tu pedido quedará pendiente hasta que se compruebe el pago.</p>
+<form id="pedidoForm">
+<input type="hidden" id="sorteo" value="Chopera 55">
 
-    <form id="pedidoForm">
-      <input type="hidden" id="sorteo" value="Chopera 55">
+<label for="nombre">Nombre y apellidos</label>
+<input id="nombre" type="text" required maxlength="120">
 
-      <label for="nombre">Nombre y apellidos</label>
-      <input id="nombre" type="text" required maxlength="120">
+<label for="telefono">Teléfono</label>
+<input id="telefono" type="tel" required maxlength="25">
 
-      <label for="telefono">Teléfono</label>
-      <input id="telefono" type="tel" required maxlength="25">
+<label for="email">Correo electrónico</label>
+<input id="email" type="email" required maxlength="150">
 
-      <label for="email">Correo electrónico</label>
-      <input id="email" type="email" required maxlength="150">
+<label for="cantidad">Número de papeletas</label>
+<input id="cantidad" type="number" min="1" max="1000" value="1" required>
 
-      <label for="cantidad">Número de papeletas</label>
-      <input id="cantidad" type="number" min="1" max="1000"
-             value="1" required>
+<label for="pago">Forma de pago</label>
+<select id="pago" required>
+<option value="Bizum">Bizum</option>
+<option value="Efectivo">Efectivo</option>
+</select>
 
-      <label for="pago">Forma de pago</label>
-      <select id="pago" required>
-        <option value="Bizum">Bizum</option>
-        <option value="Efectivo">Efectivo</option>
-      </select>
+<label>
+<input id="papel" type="checkbox" style="display:inline;width:auto">
+Quiero solicitar también mi papeleta en papel.
+</label>
 
-      <label>
-        <input id="papel" type="checkbox"
-               style="display:inline;width:auto">
-        Quiero solicitar también mi papeleta en papel.
-      </label>
+<p>Total: <span class="precio" id="total">2,00 €</span></p>
+<button id="enviar" type="submit">ENVIAR SOLICITUD</button>
+</form>
 
-      <p>Total: <span class="precio" id="total">2,00 €</span></p>
-
-      <button id="enviar" type="submit">ENVIAR SOLICITUD</button>
-    </form>
-
-    <div id="resultado"></div>
-    <small>Enviar la solicitud no significa que el pago esté confirmado
-    ni que tengas asignado un número de papeleta.</small>
-  </div>
+<div id="resultado"></div>
+<small>Enviar la solicitud no significa que el pago esté confirmado ni que tengas asignado un número de papeleta.</small>
+</div>
 </section>
 
 <section>
-  <div class="card">
-    <h2>📩 ¿Tienes alguna duda?</h2>
-    <p>Para consultas sobre los sorteos, ponte en contacto con la
-    organización de la Cesta de Navidad de Gon.</p>
-  </div>
+<div class="card">
+<h2>📩 ¿Tienes alguna duda?</h2>
+<p>Para consultas sobre los sorteos, ponte en contacto con la organización de la Cesta de Navidad de Gon.</p>
+</div>
 </section>
-
 </main>
 
 <footer>
-  <p>🎄 III Edición de la Cesta de Navidad de Gon 🎄</p>
-  <p>Chopera 55 · C/ Pez Austral 14</p>
-  <small>© 2026 · Todos los derechos reservados</small>
+<p>🎄 III Edición de la Cesta de Navidad de Gon 🎄</p>
+<p>Chopera 55 · C/ Pez Austral 14</p>
+<small>© 2026 · Todos los derechos reservados</small>
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-// 1. CONFIGURACIÓN DE SUPABASE
+(function(){
+"use strict";
+
+// CONFIGURACIÓN DE SUPABASE
 const SUPABASE_URL = "https://dfbsbbzvxuqypeowtvld.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_TMJmvhwo-K8fnBhAOGEryg_XWHetqoZ";
+
+if (!window.supabase) {
+  alert("No se ha podido cargar la conexión con Supabase.");
+  return;
+}
 
 const supabaseClient = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_ANON_KEY
 );
 
-// 2. PRODUCTOS
-// El 1 de diciembre añadiremos aquí los productos de cada cesta.
-// Ejemplo:
-// { nombre: "Turrón", descripcion: "Turrón de Navidad",
-//   imagen: "URL_DE_LA_FOTO" }
-
+// PRODUCTOS
 const productosChopera = [];
 const productosPez = [];
 
@@ -316,23 +214,22 @@ function mostrarProductos(lista, contenedorId) {
 mostrarProductos(productosChopera, "productos-chopera");
 mostrarProductos(productosPez, "productos-pez");
 
-// 3. SELECCIONAR SORTEO
-function seleccionarSorteo(nombre) {
+// SELECCIONAR SORTEO
+window.seleccionarSorteo = function(nombre) {
   if (nombre !== "Chopera 55") {
     alert("Este sorteo todavía no está disponible para compras.");
     return;
   }
 
   document.getElementById("sorteo").value = nombre;
-  document.getElementById("tituloCompra").textContent =
-    "Sorteo: " + nombre;
+  document.getElementById("tituloCompra").textContent = "Sorteo: " + nombre;
 
   document.getElementById("comprar").scrollIntoView({
     behavior: "smooth"
   });
-}
+};
 
-// 4. CALCULAR EL TOTAL
+// CALCULAR TOTAL
 const cantidadInput = document.getElementById("cantidad");
 const totalTexto = document.getElementById("total");
 
@@ -348,77 +245,65 @@ function actualizarTotal() {
 
 cantidadInput.addEventListener("input", actualizarTotal);
 
-// 5. ENVIAR PEDIDO A SUPABASE
-document.getElementById("pedidoForm").addEventListener(
-  "submit",
-  async function(event) {
-    event.preventDefault();
+// ENVIAR PEDIDO
+document.getElementById("pedidoForm").addEventListener("submit", async function(event) {
+  event.preventDefault();
 
-    const resultado = document.getElementById("resultado");
-    const boton = document.getElementById("enviar");
+  const resultado = document.getElementById("resultado");
+  const boton = document.getElementById("enviar");
+  const cantidad = Number(cantidadInput.value);
 
-    const cantidad = Number(cantidadInput.value);
-
-    if (!Number.isInteger(cantidad) || cantidad < 1 || cantidad > 1000) {
-      alert("Introduce una cantidad entre 1 y 1.000.");
-      return;
-    }
-
-    if (SUPABASE_ANON_KEY === "sb_publishable_TMJmvhwo-K8fnBhAOGEryg_XWHetqoZ") {
-      alert("Primero tienes que poner tu clave pública de Supabase.");
-      return;
-    }
-
-    boton.disabled = true;
-    boton.textContent = "ENVIANDO...";
-
-    resultado.style.display = "block";
-    resultado.textContent = "Estamos guardando tu solicitud...";
-
-    const datos = {
-      p_sorteo: document.getElementById("sorteo").value,
-      p_nombre: document.getElementById("nombre").value.trim(),
-      p_telefono: document.getElementById("telefono").value.trim(),
-      p_email: document.getElementById("email").value.trim(),
-      p_cantidad: cantidad,
-      p_metodo_pago: document.getElementById("pago").value,
-      p_solicitar_papel: document.getElementById("papel").checked
-    };
-
-    try {
-      const { data, error } = await supabaseClient.rpc(
-        "crear_pedido",
-        datos
-      );
-
-      if (error) throw error;
-
-      resultado.style.background = "#e5f4e9";
-      resultado.style.color = "#174b35";
-      resultado.textContent =
-        "¡Solicitud recibida! Tu referencia es " + data +
-        ". Tu pedido está pendiente de confirmación del pago. " +
-        "Todavía no tienes números de papeleta asignados.";
-
-      document.getElementById("pedidoForm").reset();
-      cantidadInput.value = 1;
-      actualizarTotal();
-
-    } catch (error) {
-      console.error(error);
-      resultado.style.background = "#fbe5e5";
-      resultado.style.color = "#8e1725";
-      resultado.textContent =
-        "No se ha podido guardar el pedido. Comprueba los datos " +
-        "o inténtalo de nuevo. Error: " + error.message;
-
-    } finally {
-      boton.disabled = false;
-      boton.textContent = "ENVIAR SOLICITUD";
-    }
+  if (!Number.isInteger(cantidad) || cantidad < 1 || cantidad > 1000) {
+    alert("Introduce una cantidad entre 1 y 1.000.");
+    return;
   }
-);
-</script>
 
+  boton.disabled = true;
+  boton.textContent = "ENVIANDO...";
+  resultado.style.display = "block";
+  resultado.textContent = "Estamos guardando tu solicitud...";
+
+  const datos = {
+    p_sorteo: document.getElementById("sorteo").value,
+    p_nombre: document.getElementById("nombre").value.trim(),
+    p_telefono: document.getElementById("telefono").value.trim(),
+    p_email: document.getElementById("email").value.trim(),
+    p_cantidad: cantidad,
+    p_metodo_pago: document.getElementById("pago").value,
+    p_solicitar_papel: document.getElementById("papel").checked
+  };
+
+  try {
+    const { data, error } = await supabaseClient.rpc("crear_pedido", datos);
+
+    if (error) throw error;
+
+    resultado.style.background = "#e5f4e9";
+    resultado.style.color = "#174b35";
+    resultado.textContent =
+      "¡Solicitud recibida! Tu referencia es " + data +
+      ". Tu pedido está pendiente de confirmación del pago. " +
+      "Todavía no tienes números de papeleta asignados.";
+
+    document.getElementById("pedidoForm").reset();
+    cantidadInput.value = 1;
+    actualizarTotal();
+
+  } catch (error) {
+    console.error("Error de Supabase:", error);
+
+    resultado.style.background = "#fbe5e5";
+    resultado.style.color = "#8e1725";
+    resultado.textContent =
+      "No se ha podido guardar el pedido. Error: " + error.message;
+
+  } finally {
+    boton.disabled = false;
+    boton.textContent = "ENVIAR SOLICITUD";
+  }
+});
+
+})();
+</script>
 </body>
 </html>

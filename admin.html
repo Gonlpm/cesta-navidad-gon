@@ -1,9 +1,11 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Administrador | Cesta de Gon</title>
+
 <style>
 *{box-sizing:border-box}
 body{
@@ -42,7 +44,6 @@ button{
   cursor:pointer;
   margin:4px
 }
-button:hover{opacity:.85}
 button.rojo{background:#a52d2d}
 button:disabled{opacity:.5;cursor:not-allowed}
 table{width:100%;border-collapse:collapse;min-width:1050px}
@@ -55,7 +56,7 @@ td,th{
 th{background:#f0eee6}
 .oculto{display:none}
 .estado{font-weight:bold}
-#mensaje{white-space:pre-wrap}
+#mensajeLogin{white-space:pre-wrap}
 .verde{color:#16713c}
 .rojo-texto{color:#b32626}
 .acciones{min-width:170px}
@@ -63,6 +64,7 @@ th{background:#f0eee6}
 </head>
 
 <body>
+
 <header>
 <h1>🎄 Panel de Administrador</h1>
 <p>III Edición de la Cesta de Navidad de Gon</p>
@@ -73,10 +75,12 @@ th{background:#f0eee6}
 <section id="acceso" class="card">
 <h2>🔐 Acceso privado</h2>
 <p>Inicia sesión con tu cuenta de administrador.</p>
+
 <input id="email" type="email" placeholder="Correo electrónico">
 <input id="password" type="password" placeholder="Contraseña">
-<button id="botonEntrar" onclick="entrar()">ENTRAR</button>
-<p id="mensaje"></p>
+
+<button id="botonEntrar" type="button">ENTRAR</button>
+<p id="mensajeLogin"></p>
 </section>
 
 <section id="panel" class="oculto">
@@ -84,13 +88,14 @@ th{background:#f0eee6}
 <div class="card">
 <h2>Bienvenido al panel de Gon 🎅</h2>
 <p id="sesion"></p>
-<button onclick="cargarPedidos()">🔄 Actualizar pedidos</button>
-<button class="rojo" onclick="salir()">Cerrar sesión</button>
+<button id="actualizar" type="button">🔄 Actualizar pedidos</button>
+<button id="botonSalir" class="rojo" type="button">Cerrar sesión</button>
 </div>
 
 <div class="card">
 <h2>📋 Solicitudes de papeletas</h2>
 <p id="resumen">Cargando...</p>
+
 <div style="overflow-x:auto">
 <table>
 <thead>
@@ -118,216 +123,349 @@ th{background:#f0eee6}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-const URL="https://dfbsbbzvxuqypeowtvld.supabase.co";
-const CLAVE="sb_publishable_TMJmvhwo-K8fnBhAOGEryg_XWHetqoZ";
+(function(){
 
-const ADMIN_ID="68399dc3-5c6b-4705-b04a-eedcabb3bdb2";
+"use strict";
 
-const db=window.supabase.createClient(URL,CLAVE);
+// CONFIGURACIÓN
+const SUPABASE_URL =
+"https://dfbsbbzvxuqypeowtvld.supabase.co";
 
-const acceso=document.getElementById("acceso");
-const panel=document.getElementById("panel");
-const mensaje=document.getElementById("mensaje");
-const tabla=document.getElementById("pedidos");
+const SUPABASE_KEY =
+"sb_publishable_TMJmvhwo-K8fnBhAOGEryg_XWHetqoZ";
+
+const ADMIN_ID =
+"68399dc3-5c6b-4705-b04a-eedcabb3bdb2";
+
+// ELEMENTOS
+const acceso = document.getElementById("acceso");
+const panel = document.getElementById("panel");
+const loginMessage = document.getElementById("mensajeLogin");
+const tabla = document.getElementById("pedidos");
+const botonEntrar = document.getElementById("botonEntrar");
+const resumen = document.getElementById("resumen");
+
+// COMPROBAR SUPABASE
+if(!window.supabase){
+  loginMessage.textContent =
+  "Error: no se ha podido cargar Supabase.";
+  botonEntrar.disabled = true;
+  return;
+}
+
+if(!SUPABASE_URL.startsWith("https://") ||
+   !SUPABASE_URL.endsWith(".supabase.co")){
+  loginMessage.textContent =
+  "Error: la dirección de Supabase no es válida.";
+  botonEntrar.disabled = true;
+  return;
+}
+
+const db = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
 
 function mostrarError(error){
   alert(error.message || String(error));
 }
 
-async function comprobarSesion(){
-  const {data,error}=await db.auth.getSession();
-
-  if(error) return;
-
-  if(data.session){
-    if(data.session.user.id===ADMIN_ID){
-      mostrarPanel(data.session.user);
-      await cargarPedidos();
-    }else{
-      await db.auth.signOut();
-    }
-  }
-}
-
 function mostrarPanel(usuario){
   acceso.classList.add("oculto");
   panel.classList.remove("oculto");
-  document.getElementById("sesion").textContent=
-    "Administrador: "+usuario.email;
+
+  document.getElementById("sesion").textContent =
+  "Administrador: " + usuario.email;
 }
 
 async function entrar(){
-  const boton=document.getElementById("botonEntrar");
-  boton.disabled=true;
-  mensaje.textContent="Comprobando acceso...";
+
+  botonEntrar.disabled = true;
+  loginMessage.textContent = "Comprobando acceso...";
 
   try{
-    const {data,error}=await db.auth.signInWithPassword({
-      email:document.getElementById("email").value.trim(),
-      password:document.getElementById("password").value
-    });
 
-    if(error) throw error;
+    const email =
+    document.getElementById("email").value.trim();
 
-    if(data.user.id!==ADMIN_ID){
-      await db.auth.signOut();
-      throw new Error("Esta cuenta no está autorizada como administradora.");
+    const password =
+    document.getElementById("password").value;
+
+    if(!email || !password){
+      throw new Error("Introduce tu correo y contraseña.");
     }
 
-    mensaje.textContent="";
-    mostrarPanel(data.user);
+    const resultado = await db.auth.signInWithPassword({
+      email: email,
+      password: password
+    });
+
+    if(resultado.error) throw resultado.error;
+
+    const usuario = resultado.data.user;
+
+    if(!usuario || usuario.id !== ADMIN_ID){
+
+      await db.auth.signOut();
+
+      throw new Error(
+        "Esta cuenta no está autorizada como administradora."
+      );
+    }
+
+    loginMessage.textContent = "";
+    mostrarPanel(usuario);
+
     await cargarPedidos();
 
   }catch(error){
-    mensaje.textContent=error.message;
+
+    loginMessage.textContent =
+    "Error de acceso: " + error.message;
+
   }finally{
-    boton.disabled=false;
+
+    botonEntrar.disabled = false;
+
+  }
+}
+
+async function comprobarSesion(){
+
+  try{
+
+    const {data,error} = await db.auth.getSession();
+
+    if(error) throw error;
+
+    if(data.session){
+
+      if(data.session.user.id === ADMIN_ID){
+
+        mostrarPanel(data.session.user);
+        await cargarPedidos();
+
+      }else{
+
+        await db.auth.signOut();
+
+      }
+    }
+
+  }catch(error){
+
+    loginMessage.textContent =
+    "Error al comprobar sesión: " + error.message;
+
   }
 }
 
 async function cargarPedidos(){
-  tabla.innerHTML="";
-  document.getElementById("resumen").textContent="Cargando pedidos...";
 
-  const {data:usuarioData}=await db.auth.getUser();
+  tabla.innerHTML = "";
+  resumen.textContent = "Cargando pedidos...";
 
-  if(!usuarioData.user || usuarioData.user.id!==ADMIN_ID){
-    await salir();
-    return;
-  }
+  try{
 
-  const {data,error}=await db
-    .from("pedidos")
-    .select("*")
-    .order("creado_en",{ascending:false});
+    const {data:usuarioData,error:usuarioError} =
+    await db.auth.getUser();
 
-  if(error){
-    document.getElementById("resumen").textContent=
-      "Error al cargar pedidos: "+error.message;
-    return;
-  }
+    if(usuarioError) throw usuarioError;
 
-  let pendientes=0;
-  let aprobados=0;
-  let rechazados=0;
+    if(!usuarioData.user ||
+       usuarioData.user.id !== ADMIN_ID){
 
-  data.forEach(p=>{
-    if(p.estado==="pendiente") pendientes++;
-    if(p.estado==="aprobado") aprobados++;
-    if(p.estado==="rechazado") rechazados++;
-
-    const fila=document.createElement("tr");
-
-    function celda(valor){
-      const td=document.createElement("td");
-      td.textContent=valor??"";
-      fila.appendChild(td);
-      return td;
+      await salir();
+      return;
     }
 
-    celda(p.nombre);
-    celda((p.telefono||"")+" | "+(p.email||""));
-    celda(p.sorteo);
-    celda(p.cantidad);
-    celda(p.total+" €");
-    celda(p.metodo_pago);
+    const {data,error} = await db
+      .from("pedidos")
+      .select("*")
+      .order("creado_en",{ascending:false});
 
-    const estado=celda(p.estado);
-    estado.className="estado";
-    if(p.estado==="aprobado") estado.classList.add("verde");
-    if(p.estado==="rechazado") estado.classList.add("rojo-texto");
+    if(error) throw error;
 
-    celda(Array.isArray(p.numeros_papeletas)
-      ? p.numeros_papeletas.join(", ")
-      : "");
+    let pendientes = 0;
+    let aprobados = 0;
+    let rechazados = 0;
 
-    celda(p.solicitar_papel?"Sí":"No");
+    data.forEach(p=>{
 
-    const acciones=celda("");
-    acciones.className="acciones";
+      if(p.estado==="pendiente") pendientes++;
+      if(p.estado==="aprobado") aprobados++;
+      if(p.estado==="rechazado") rechazados++;
 
-    if(p.estado==="pendiente" && p.sorteo==="Chopera 55"){
-      const aprobar=document.createElement("button");
-      aprobar.textContent="APROBAR";
-      aprobar.onclick=()=>aprobarPedido(p.id);
-      acciones.appendChild(aprobar);
+      const fila = document.createElement("tr");
 
-      const rechazar=document.createElement("button");
-      rechazar.textContent="RECHAZAR";
-      rechazar.className="rojo";
-      rechazar.onclick=()=>rechazarPedido(p.id);
-      acciones.appendChild(rechazar);
-    }else{
-      acciones.textContent="Sin acciones";
-    }
+      function celda(valor){
 
-    tabla.appendChild(fila);
-  });
+        const td = document.createElement("td");
+        td.textContent = valor ?? "";
+        fila.appendChild(td);
+        return td;
 
-  document.getElementById("resumen").textContent=
-    "Pedidos: "+data.length+
-    " | Pendientes: "+pendientes+
-    " | Aprobados: "+aprobados+
-    " | Rechazados: "+rechazados;
+      }
+
+      celda(p.nombre);
+      celda((p.telefono || "")+" | "+(p.email || ""));
+      celda(p.sorteo);
+      celda(p.cantidad);
+      celda(p.total+" €");
+      celda(p.metodo_pago);
+
+      const estado = celda(p.estado);
+      estado.className = "estado";
+
+      if(p.estado==="aprobado")
+        estado.classList.add("verde");
+
+      if(p.estado==="rechazado")
+        estado.classList.add("rojo-texto");
+
+      celda(
+        Array.isArray(p.numeros_papeletas)
+        ? p.numeros_papeletas.join(", ")
+        : ""
+      );
+
+      celda(p.solicitar_papel ? "Sí" : "No");
+
+      const acciones = celda("");
+      acciones.className = "acciones";
+
+      if(p.estado==="pendiente" &&
+         p.sorteo==="Chopera 55"){
+
+        const aprobar = document.createElement("button");
+        aprobar.textContent = "APROBAR";
+        aprobar.onclick = ()=>aprobarPedido(p.id);
+        acciones.appendChild(aprobar);
+
+        const rechazar = document.createElement("button");
+        rechazar.textContent = "RECHAZAR";
+        rechazar.className = "rojo";
+        rechazar.onclick = ()=>rechazarPedido(p.id);
+        acciones.appendChild(rechazar);
+
+      }else{
+
+        acciones.textContent = "Sin acciones";
+
+      }
+
+      tabla.appendChild(fila);
+
+    });
+
+    resumen.textContent =
+      "Pedidos: "+data.length+
+      " | Pendientes: "+pendientes+
+      " | Aprobados: "+aprobados+
+      " | Rechazados: "+rechazados;
+
+  }catch(error){
+
+    resumen.textContent =
+    "Error al cargar pedidos: "+error.message;
+
+  }
 }
 
 async function aprobarPedido(id){
-  if(!confirm("¿Confirmas el pago y la aprobación de esta compra?"))return;
+
+  if(!confirm(
+    "¿Has comprobado el pago y quieres aprobar esta compra?"
+  )) return;
 
   try{
-    const {data,error}=await db.rpc("aprobar_pedido",{
-      p_id:id
-    });
 
-    if(error)throw error;
+    const {data,error} = await db.rpc(
+      "aprobar_pedido",
+      {p_id:id}
+    );
 
-    alert("Compra aprobada.\nNúmeros asignados: "+data.join(", "));
+    if(error) throw error;
+
+    alert(
+      "Compra aprobada.\nNúmeros asignados: "+
+      data.join(", ")
+    );
+
     await cargarPedidos();
 
   }catch(error){
+
     mostrarError(error);
+
   }
 }
 
 async function rechazarPedido(id){
-  if(!confirm("¿Seguro que quieres rechazar este pedido?"))return;
+
+  if(!confirm("¿Seguro que quieres rechazar este pedido?"))
+    return;
 
   try{
-    const {data,error}=await db.rpc("rechazar_pedido",{
-      p_id:id
-    });
 
-    if(error)throw error;
+    const {data,error} = await db.rpc(
+      "rechazar_pedido",
+      {p_id:id}
+    );
 
-    if(data!==true)throw new Error("No se confirmó el rechazo.");
+    if(error) throw error;
+
+    if(data !== true){
+      throw new Error("No se confirmó el rechazo.");
+    }
 
     alert("Pedido rechazado correctamente.");
+
     await cargarPedidos();
 
   }catch(error){
+
     mostrarError(error);
+
   }
 }
 
 async function salir(){
-  await db.auth.signOut();
-  panel.classList.add("oculto");
-  acceso.classList.remove("oculto");
-  tabla.innerHTML="";
-  document.getElementById("resumen").textContent="";
-  document.getElementById("password").value="";
-  mensaje.textContent="Sesión cerrada.";
-}
 
-db.auth.onAuthStateChange((event,session)=>{
-  if(event==="SIGNED_OUT"){
+  try{
+
+    const {error} = await db.auth.signOut();
+
+    if(error) throw error;
+
     panel.classList.add("oculto");
     acceso.classList.remove("oculto");
-    tabla.innerHTML="";
-  }
-});
+    tabla.innerHTML = "";
+    resumen.textContent = "";
+    document.getElementById("password").value = "";
+    loginMessage.textContent = "Sesión cerrada.";
 
+  }catch(error){
+
+    mostrarError(error);
+
+  }
+}
+
+// BOTONES
+botonEntrar.addEventListener("click",entrar);
+
+document.getElementById("actualizar")
+.addEventListener("click",cargarPedidos);
+
+document.getElementById("botonSalir")
+.addEventListener("click",salir);
+
+// INICIO
 comprobarSesion();
+
+})();
 </script>
+
 </body>
 </html>

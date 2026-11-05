@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -5,99 +6,329 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Administrador | Cesta de Gon</title>
 <style>
-body{font-family:Arial;background:#f8f5ed;margin:0;color:#26382e}
-header{background:#173d30;color:white;padding:25px;text-align:center}
-main{max-width:1000px;margin:25px auto;padding:15px}
-.card{background:white;border-radius:12px;padding:20px;margin:15px 0}
-input{padding:12px;width:95%;margin:8px 0;border:1px solid #ccc;border-radius:7px}
-button{padding:11px 16px;background:#173d30;color:white;border:0;border-radius:7px;cursor:pointer;margin:4px}
-table{width:100%;border-collapse:collapse}
-td,th{padding:10px;border-bottom:1px solid #ddd;text-align:left}
+*{box-sizing:border-box}
+body{
+  font-family:Arial,sans-serif;
+  background:#f8f5ed;
+  margin:0;
+  color:#26382e
+}
+header{
+  background:#173d30;
+  color:white;
+  padding:25px;
+  text-align:center
+}
+main{max-width:1200px;margin:25px auto;padding:15px}
+.card{
+  background:white;
+  border-radius:12px;
+  padding:20px;
+  margin:15px 0;
+  box-shadow:0 3px 12px #00000010
+}
+input{
+  padding:12px;
+  width:100%;
+  margin:8px 0;
+  border:1px solid #ccc;
+  border-radius:7px
+}
+button{
+  padding:11px 16px;
+  background:#173d30;
+  color:white;
+  border:0;
+  border-radius:7px;
+  cursor:pointer;
+  margin:4px
+}
+button:hover{opacity:.85}
+button.rojo{background:#a52d2d}
+button:disabled{opacity:.5;cursor:not-allowed}
+table{width:100%;border-collapse:collapse;min-width:1050px}
+td,th{
+  padding:10px;
+  border-bottom:1px solid #ddd;
+  text-align:left;
+  vertical-align:top
+}
+th{background:#f0eee6}
 .oculto{display:none}
+.estado{font-weight:bold}
+#mensaje{white-space:pre-wrap}
+.verde{color:#16713c}
+.rojo-texto{color:#b32626}
+.acciones{min-width:170px}
 </style>
 </head>
+
 <body>
 <header>
 <h1>🎄 Panel de Administrador</h1>
-<p>III Cesta de Navidad de Gon</p>
+<p>III Edición de la Cesta de Navidad de Gon</p>
 </header>
+
 <main>
-<section class="card">
-<h2>Acceso privado</h2>
+
+<section id="acceso" class="card">
+<h2>🔐 Acceso privado</h2>
 <p>Inicia sesión con tu cuenta de administrador.</p>
 <input id="email" type="email" placeholder="Correo electrónico">
 <input id="password" type="password" placeholder="Contraseña">
-<button onclick="entrar()">ENTRAR</button>
+<button id="botonEntrar" onclick="entrar()">ENTRAR</button>
 <p id="mensaje"></p>
 </section>
 
 <section id="panel" class="oculto">
+
 <div class="card">
-<h2>Bienvenido al panel</h2>
-<button onclick="cargarPedidos()">Actualizar pedidos</button>
-<button onclick="salir()">Cerrar sesión</button>
+<h2>Bienvenido al panel de Gon 🎅</h2>
+<p id="sesion"></p>
+<button onclick="cargarPedidos()">🔄 Actualizar pedidos</button>
+<button class="rojo" onclick="salir()">Cerrar sesión</button>
 </div>
+
 <div class="card">
-<h2>Solicitudes de papeletas</h2>
+<h2>📋 Solicitudes de papeletas</h2>
+<p id="resumen">Cargando...</p>
 <div style="overflow-x:auto">
 <table>
 <thead>
 <tr>
 <th>Cliente</th>
+<th>Contacto</th>
 <th>Sorteo</th>
 <th>Cantidad</th>
 <th>Total</th>
+<th>Pago</th>
 <th>Estado</th>
+<th>Números</th>
+<th>Papel</th>
+<th>Acciones</th>
 </tr>
 </thead>
 <tbody id="pedidos"></tbody>
 </table>
 </div>
 </div>
+
 </section>
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
 const URL="https://dfbsbbzvxuqypeowtvld.supabase.co";
 const CLAVE="sb_publishable_TMJmvhwo-K8fnBhAOGEryg_XWHetqoZ";
+
+const ADMIN_ID="68399dc3-5c6b-4705-b04a-eedcabb3bdb2";
+
 const db=window.supabase.createClient(URL,CLAVE);
 
+const acceso=document.getElementById("acceso");
+const panel=document.getElementById("panel");
+const mensaje=document.getElementById("mensaje");
+const tabla=document.getElementById("pedidos");
+
+function mostrarError(error){
+  alert(error.message || String(error));
+}
+
+async function comprobarSesion(){
+  const {data,error}=await db.auth.getSession();
+
+  if(error) return;
+
+  if(data.session){
+    if(data.session.user.id===ADMIN_ID){
+      mostrarPanel(data.session.user);
+      await cargarPedidos();
+    }else{
+      await db.auth.signOut();
+    }
+  }
+}
+
+function mostrarPanel(usuario){
+  acceso.classList.add("oculto");
+  panel.classList.remove("oculto");
+  document.getElementById("sesion").textContent=
+    "Administrador: "+usuario.email;
+}
+
 async function entrar(){
- const {error}=await db.auth.signInWithPassword({
-  email:document.getElementById("email").value,
-  password:document.getElementById("password").value
- });
- document.getElementById("mensaje").textContent=
- error?error.message:"Sesión iniciada.";
- if(!error){
-  document.getElementById("panel").classList.remove("oculto");
-  cargarPedidos();
- }
+  const boton=document.getElementById("botonEntrar");
+  boton.disabled=true;
+  mensaje.textContent="Comprobando acceso...";
+
+  try{
+    const {data,error}=await db.auth.signInWithPassword({
+      email:document.getElementById("email").value.trim(),
+      password:document.getElementById("password").value
+    });
+
+    if(error) throw error;
+
+    if(data.user.id!==ADMIN_ID){
+      await db.auth.signOut();
+      throw new Error("Esta cuenta no está autorizada como administradora.");
+    }
+
+    mensaje.textContent="";
+    mostrarPanel(data.user);
+    await cargarPedidos();
+
+  }catch(error){
+    mensaje.textContent=error.message;
+  }finally{
+    boton.disabled=false;
+  }
 }
 
 async function cargarPedidos(){
- const {data,error}=await db.from("pedidos")
- .select("*").order("creado_en",{ascending:false});
- if(error){alert("Error: "+error.message);return;}
- const tabla=document.getElementById("pedidos");
- tabla.innerHTML="";
- data.forEach(p=>{
-  const fila=document.createElement("tr");
-  [p.nombre,p.sorteo,p.cantidad,p.total+" €",p.estado]
-  .forEach(valor=>{
-   const celda=document.createElement("td");
-   celda.textContent=valor??"";
-   fila.appendChild(celda);
+  tabla.innerHTML="";
+  document.getElementById("resumen").textContent="Cargando pedidos...";
+
+  const {data:usuarioData}=await db.auth.getUser();
+
+  if(!usuarioData.user || usuarioData.user.id!==ADMIN_ID){
+    await salir();
+    return;
+  }
+
+  const {data,error}=await db
+    .from("pedidos")
+    .select("*")
+    .order("creado_en",{ascending:false});
+
+  if(error){
+    document.getElementById("resumen").textContent=
+      "Error al cargar pedidos: "+error.message;
+    return;
+  }
+
+  let pendientes=0;
+  let aprobados=0;
+  let rechazados=0;
+
+  data.forEach(p=>{
+    if(p.estado==="pendiente") pendientes++;
+    if(p.estado==="aprobado") aprobados++;
+    if(p.estado==="rechazado") rechazados++;
+
+    const fila=document.createElement("tr");
+
+    function celda(valor){
+      const td=document.createElement("td");
+      td.textContent=valor??"";
+      fila.appendChild(td);
+      return td;
+    }
+
+    celda(p.nombre);
+    celda((p.telefono||"")+" | "+(p.email||""));
+    celda(p.sorteo);
+    celda(p.cantidad);
+    celda(p.total+" €");
+    celda(p.metodo_pago);
+
+    const estado=celda(p.estado);
+    estado.className="estado";
+    if(p.estado==="aprobado") estado.classList.add("verde");
+    if(p.estado==="rechazado") estado.classList.add("rojo-texto");
+
+    celda(Array.isArray(p.numeros_papeletas)
+      ? p.numeros_papeletas.join(", ")
+      : "");
+
+    celda(p.solicitar_papel?"Sí":"No");
+
+    const acciones=celda("");
+    acciones.className="acciones";
+
+    if(p.estado==="pendiente" && p.sorteo==="Chopera 55"){
+      const aprobar=document.createElement("button");
+      aprobar.textContent="APROBAR";
+      aprobar.onclick=()=>aprobarPedido(p.id);
+      acciones.appendChild(aprobar);
+
+      const rechazar=document.createElement("button");
+      rechazar.textContent="RECHAZAR";
+      rechazar.className="rojo";
+      rechazar.onclick=()=>rechazarPedido(p.id);
+      acciones.appendChild(rechazar);
+    }else{
+      acciones.textContent="Sin acciones";
+    }
+
+    tabla.appendChild(fila);
   });
-  tabla.appendChild(fila);
- });
+
+  document.getElementById("resumen").textContent=
+    "Pedidos: "+data.length+
+    " | Pendientes: "+pendientes+
+    " | Aprobados: "+aprobados+
+    " | Rechazados: "+rechazados;
+}
+
+async function aprobarPedido(id){
+  if(!confirm("¿Confirmas el pago y la aprobación de esta compra?"))return;
+
+  try{
+    const {data,error}=await db.rpc("aprobar_pedido",{
+      p_id:id
+    });
+
+    if(error)throw error;
+
+    alert("Compra aprobada.\nNúmeros asignados: "+data.join(", "));
+    await cargarPedidos();
+
+  }catch(error){
+    mostrarError(error);
+  }
+}
+
+async function rechazarPedido(id){
+  if(!confirm("¿Seguro que quieres rechazar este pedido?"))return;
+
+  try{
+    const {data,error}=await db.rpc("rechazar_pedido",{
+      p_id:id
+    });
+
+    if(error)throw error;
+
+    if(data!==true)throw new Error("No se confirmó el rechazo.");
+
+    alert("Pedido rechazado correctamente.");
+    await cargarPedidos();
+
+  }catch(error){
+    mostrarError(error);
+  }
 }
 
 async function salir(){
- await db.auth.signOut();
- document.getElementById("panel").classList.add("oculto");
+  await db.auth.signOut();
+  panel.classList.add("oculto");
+  acceso.classList.remove("oculto");
+  tabla.innerHTML="";
+  document.getElementById("resumen").textContent="";
+  document.getElementById("password").value="";
+  mensaje.textContent="Sesión cerrada.";
 }
+
+db.auth.onAuthStateChange((event,session)=>{
+  if(event==="SIGNED_OUT"){
+    panel.classList.add("oculto");
+    acceso.classList.remove("oculto");
+    tabla.innerHTML="";
+  }
+});
+
+comprobarSesion();
 </script>
 </body>
 </html>

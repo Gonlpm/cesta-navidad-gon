@@ -59,6 +59,75 @@ th{background:#f0eee6}
 .verde{color:#16713c}
 .rojo-texto{color:#b32626}
 .acciones{min-width:170px}
+
+/* CONTADOR DE PAPELETAS */
+.contadores{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:12px;
+  margin:20px 0
+}
+.contador{
+  background:#f8f5ed;
+  padding:18px;
+  border-radius:10px;
+  border:1px solid #e5e0d4
+}
+.contador h3{
+  font-size:13px;
+  margin:0 0 12px;
+  color:#657267
+}
+.contador .numero{
+  font-size:30px;
+  font-weight:bold;
+  color:#173d30
+}
+.contador.disponibles .numero{color:#16713c}
+.contador.reservadas .numero{color:#b7791f}
+.contador.vendidas .numero{color:#173d30}
+
+.estado-contador{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+  margin-top:15px
+}
+.estado-caja{
+  background:#f8f5ed;
+  padding:15px;
+  border-radius:9px;
+  text-align:center
+}
+.estado-caja strong{
+  display:block;
+  font-size:25px;
+  margin-top:8px
+}
+.barra{
+  height:15px;
+  background:#e9e5dc;
+  border-radius:20px;
+  overflow:hidden;
+  margin-top:18px
+}
+.barra-progreso{
+  height:100%;
+  width:0%;
+  background:#16713c;
+  transition:width .3s
+}
+.nota{
+  color:#777;
+  font-size:13px;
+  margin-top:15px
+}
+
+@media(max-width:650px){
+  .contadores{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .estado-contador{grid-template-columns:1fr}
+  .contador .numero{font-size:25px}
+}
 </style>
 </head>
 
@@ -89,6 +158,73 @@ th{background:#f0eee6}
 <p id="sesion"></p>
 <button id="actualizar" type="button">🔄 Actualizar pedidos</button>
 <button id="botonSalir" class="rojo" type="button">Cerrar sesión</button>
+</div>
+
+<!-- CONTADOR CHOPERA 55 -->
+<div class="card">
+
+<h2>🎟️ Control de papeletas — Chopera 55</h2>
+<p>Total de papeletas: <strong>1.000</strong></p>
+
+<div class="contadores">
+
+<div class="contador">
+<h3>TOTAL</h3>
+<div class="numero">1.000</div>
+</div>
+
+<div class="contador reservadas">
+<h3>RESERVADAS</h3>
+<div class="numero" id="reservadas">—</div>
+</div>
+
+<div class="contador vendidas">
+<h3>VENDIDAS</h3>
+<div class="numero" id="vendidas">—</div>
+</div>
+
+<div class="contador disponibles">
+<h3>DISPONIBLES</h3>
+<div class="numero" id="disponibles">—</div>
+</div>
+
+</div>
+
+<h3>📋 Estado de los pedidos</h3>
+
+<div class="estado-contador">
+
+<div class="estado-caja">
+Pendientes
+<strong id="pedidosPendientes">—</strong>
+</div>
+
+<div class="estado-caja">
+Aprobados
+<strong id="pedidosAprobados">—</strong>
+</div>
+
+<div class="estado-caja">
+Rechazados
+<strong id="pedidosRechazados">—</strong>
+</div>
+
+</div>
+
+<div class="barra">
+<div id="barraVendidas" class="barra-progreso"></div>
+</div>
+
+<p id="porcentajeVendidas" class="nota">
+Esperando datos de Supabase...
+</p>
+
+<p class="nota">
+Las papeletas pendientes cuentan como reservadas.
+Las aprobadas cuentan como vendidas.
+Los pedidos rechazados no consumen papeletas.
+</p>
+
 </div>
 
 <div class="card">
@@ -136,6 +272,8 @@ const SUPABASE_KEY =
 const ADMIN_ID =
 "68399dc3-5c6b-4705-b04a-eedcabb3bdb2";
 
+const TOTAL_PAPELETAS = 1000;
+
 // ELEMENTOS
 const acceso = document.getElementById("acceso");
 const panel = document.getElementById("panel");
@@ -169,14 +307,98 @@ function mostrarError(error){
   alert(error.message || String(error));
 }
 
+// ACTUALIZAR CONTADOR
+function actualizarContador(data){
+
+  const chopera = data.filter(p =>
+    p.sorteo === "Chopera 55"
+  );
+
+  let reservadas = 0;
+  let vendidas = 0;
+
+  let pendientes = 0;
+  let aprobados = 0;
+  let rechazados = 0;
+
+  chopera.forEach(p => {
+
+    const cantidad = Number(p.cantidad);
+
+    if(!Number.isFinite(cantidad) || cantidad < 0){
+      throw new Error(
+        "Se ha encontrado una cantidad de papeletas no válida."
+      );
+    }
+
+    if(p.estado === "pendiente"){
+      pendientes++;
+      reservadas += cantidad;
+    }
+
+    else if(p.estado === "aprobado"){
+      aprobados++;
+      vendidas += cantidad;
+    }
+
+    else if(p.estado === "rechazado"){
+      rechazados++;
+    }
+
+  });
+
+  const ocupadas = reservadas + vendidas;
+
+  const disponibles = TOTAL_PAPELETAS - ocupadas;
+
+  if(disponibles < 0){
+    throw new Error(
+      "La cantidad contabilizada supera las 1.000 papeletas. Revisa los pedidos."
+    );
+  }
+
+  document.getElementById("reservadas").textContent =
+    reservadas.toLocaleString("es-ES");
+
+  document.getElementById("vendidas").textContent =
+    vendidas.toLocaleString("es-ES");
+
+  document.getElementById("disponibles").textContent =
+    disponibles.toLocaleString("es-ES");
+
+  document.getElementById("pedidosPendientes").textContent =
+    pendientes;
+
+  document.getElementById("pedidosAprobados").textContent =
+    aprobados;
+
+  document.getElementById("pedidosRechazados").textContent =
+    rechazados;
+
+  const porcentaje =
+    (vendidas / TOTAL_PAPELETAS) * 100;
+
+  document.getElementById("barraVendidas").style.width =
+    porcentaje + "%";
+
+  document.getElementById("porcentajeVendidas").textContent =
+    porcentaje.toFixed(1) +
+    "% de las papeletas están vendidas.";
+
+}
+
+// MOSTRAR PANEL
 function mostrarPanel(usuario){
+
   acceso.classList.add("oculto");
   panel.classList.remove("oculto");
 
   document.getElementById("sesion").textContent =
   "Administrador: " + usuario.email;
+
 }
 
+// INICIAR SESIÓN
 async function entrar(){
 
   botonEntrar.disabled = true;
@@ -229,6 +451,7 @@ async function entrar(){
   }
 }
 
+// COMPROBAR SESIÓN
 async function comprobarSesion(){
 
   try{
@@ -259,10 +482,24 @@ async function comprobarSesion(){
   }
 }
 
+// CARGAR PEDIDOS
 async function cargarPedidos(){
 
   tabla.innerHTML = "";
   resumen.textContent = "Cargando pedidos...";
+
+  document.getElementById("reservadas").textContent = "—";
+  document.getElementById("vendidas").textContent = "—";
+  document.getElementById("disponibles").textContent = "—";
+
+  document.getElementById("pedidosPendientes").textContent = "—";
+  document.getElementById("pedidosAprobados").textContent = "—";
+  document.getElementById("pedidosRechazados").textContent = "—";
+
+  document.getElementById("barraVendidas").style.width = "0%";
+
+  document.getElementById("porcentajeVendidas").textContent =
+    "Actualizando datos...";
 
   try{
 
@@ -284,6 +521,9 @@ async function cargarPedidos(){
       .order("creado_en",{ascending:false});
 
     if(error) throw error;
+
+    // ACTUALIZAR CONTADOR CON DATOS REALES
+    actualizarContador(data);
 
     let pendientes = 0;
     let aprobados = 0;
@@ -368,9 +608,13 @@ async function cargarPedidos(){
     resumen.textContent =
     "Error al cargar pedidos: "+error.message;
 
+    document.getElementById("porcentajeVendidas").textContent =
+    "No se pudieron actualizar los datos.";
+
   }
 }
 
+// APROBAR PEDIDO
 async function aprobarPedido(id){
 
   if(!confirm(
@@ -400,6 +644,7 @@ async function aprobarPedido(id){
   }
 }
 
+// RECHAZAR PEDIDO
 async function rechazarPedido(id){
 
   if(!confirm("¿Seguro que quieres rechazar este pedido?"))
@@ -429,6 +674,7 @@ async function rechazarPedido(id){
   }
 }
 
+// CERRAR SESIÓN
 async function salir(){
 
   try{
@@ -441,7 +687,9 @@ async function salir(){
     acceso.classList.remove("oculto");
     tabla.innerHTML = "";
     resumen.textContent = "";
+
     document.getElementById("password").value = "";
+
     loginMessage.textContent = "Sesión cerrada.";
 
   }catch(error){

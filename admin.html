@@ -4,27 +4,28 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Administrador | Cesta de Gon</title>
-
 <style>
 *{box-sizing:border-box}
 body{font-family:Arial,sans-serif;background:#f8f5ed;margin:0;color:#26382e}
 header{background:#173d30;color:white;padding:25px;text-align:center}
-main{max-width:1300px;margin:25px auto;padding:15px}
+main{max-width:1400px;margin:25px auto;padding:15px}
 .card{background:white;border-radius:12px;padding:20px;margin:15px 0;box-shadow:0 3px 12px #00000010}
 input{padding:12px;width:100%;margin:8px 0;border:1px solid #ccc;border-radius:7px}
-button{padding:11px 16px;background:#173d30;color:white;border:0;border-radius:7px;cursor:pointer;margin:4px}
+button{padding:11px 14px;background:#173d30;color:white;border:0;border-radius:7px;cursor:pointer;margin:4px}
 button.rojo{background:#a52d2d}
 button.azul{background:#245b91}
+button.verde{background:#16713c}
 button:disabled{opacity:.5;cursor:not-allowed}
-table{width:100%;border-collapse:collapse;min-width:1350px}
+table{width:100%;border-collapse:collapse;min-width:1500px}
 td,th{padding:10px;border-bottom:1px solid #ddd;text-align:left;vertical-align:top}
 th{background:#f0eee6}
 .oculto{display:none}
 .estado{font-weight:bold}
-.verde{color:#16713c}
+.verde-texto{color:#16713c}
 .rojo-texto{color:#b32626}
 .acciones{min-width:190px}
-.referencia{font-size:12px;max-width:190px;overflow-wrap:anywhere}
+.referencia{font-size:12px;max-width:170px;overflow-wrap:anywhere}
+.codigo{font-weight:bold;color:#173d30;font-size:14px;overflow-wrap:anywhere}
 .contadores{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:20px 0}
 .contador{background:#f8f5ed;padding:18px;border-radius:10px;border:1px solid #e5e0d4}
 .contador h3{font-size:13px;margin:0 0 12px;color:#657267}
@@ -37,8 +38,7 @@ th{background:#f0eee6}
 .barra{height:15px;background:#e9e5dc;border-radius:20px;overflow:hidden;margin-top:18px}
 .barra-progreso{height:100%;width:0%;background:#16713c;transition:width .3s}
 .nota{color:#777;font-size:13px;margin-top:15px}
-#mensajeLogin{white-space:pre-wrap}
-#mensajeGeneral{white-space:pre-wrap}
+#mensajeLogin,#mensajeGeneral{white-space:pre-wrap}
 @media(max-width:650px){
 .contadores{grid-template-columns:repeat(2,minmax(0,1fr))}
 .estado-contador{grid-template-columns:1fr}
@@ -46,7 +46,6 @@ th{background:#f0eee6}
 }
 </style>
 </head>
-
 <body>
 
 <header>
@@ -81,20 +80,16 @@ th{background:#f0eee6}
 
 <div class="contadores">
 <div class="contador">
-<h3>TOTAL</h3>
-<div class="numero">1.000</div>
+<h3>TOTAL</h3><div class="numero">1.000</div>
 </div>
 <div class="contador reservadas">
-<h3>RESERVADAS</h3>
-<div class="numero" id="reservadas">—</div>
+<h3>RESERVADAS</h3><div class="numero" id="reservadas">—</div>
 </div>
 <div class="contador">
-<h3>VENDIDAS</h3>
-<div class="numero" id="vendidas">—</div>
+<h3>VENDIDAS</h3><div class="numero" id="vendidas">—</div>
 </div>
 <div class="contador disponibles">
-<h3>DISPONIBLES</h3>
-<div class="numero" id="disponibles">—</div>
+<h3>DISPONIBLES</h3><div class="numero" id="disponibles">—</div>
 </div>
 </div>
 
@@ -105,12 +100,8 @@ th{background:#f0eee6}
 <div class="estado-caja">Rechazados<strong id="pedidosRechazados">—</strong></div>
 </div>
 
-<div class="barra">
-<div id="barraVendidas" class="barra-progreso"></div>
-</div>
-
-<p id="porcentajeVendidas" class="nota">Esperando datos de Supabase...</p>
-<p class="nota">Las papeletas pendientes cuentan como reservadas. Las aprobadas cuentan como vendidas. Los pedidos rechazados no consumen papeletas.</p>
+<div class="barra"><div id="barraVendidas" class="barra-progreso"></div></div>
+<p id="porcentajeVendidas" class="nota">Esperando datos...</p>
 </div>
 
 <div class="card">
@@ -124,6 +115,7 @@ th{background:#f0eee6}
 <th>Cliente</th>
 <th>Contacto</th>
 <th>Referencia</th>
+<th>N.º justificante</th>
 <th>Sorteo</th>
 <th>Cantidad</th>
 <th>Total</th>
@@ -138,7 +130,6 @@ th{background:#f0eee6}
 </table>
 </div>
 </div>
-
 </section>
 </main>
 
@@ -148,115 +139,77 @@ th{background:#f0eee6}
 (function(){
 "use strict";
 
-const SUPABASE_URL =
-"https://dfbsbbzvxuqypeowtvld.supabase.co";
+const SUPABASE_URL="https://dfbsbbzvxuqypeowtvld.supabase.co";
+const SUPABASE_KEY="sb_publishable_TMJmvhwo-K8fnBhAOGEryg_XWHetqoZ";
+const ADMIN_ID="68399dc3-5c6b-4705-b04a-eedcabb3bdb2";
+const TOTAL_PAPELETAS=1000;
 
-const SUPABASE_KEY =
-"sb_publishable_TMJmvhwo-K8fnBhAOGEryg_XWHetqoZ";
+const URL_SEGUIMIENTO="https://script.google.com/macros/s/AKfycbw6E_cldHlYzbWADdavE55xu5vBrLFWBlFmpBPx3aosLMNaRHXXQr997A5RsLmRNH8/exec";
 
-const ADMIN_ID =
-"68399dc3-5c6b-4705-b04a-eedcabb3bdb2";
-
-const TOTAL_PAPELETAS = 1000;
-
-const acceso = document.getElementById("acceso");
-const panel = document.getElementById("panel");
-const loginMessage = document.getElementById("mensajeLogin");
-const tabla = document.getElementById("pedidos");
-const botonEntrar = document.getElementById("botonEntrar");
-const resumen = document.getElementById("resumen");
-const mensajeGeneral = document.getElementById("mensajeGeneral");
+const acceso=document.getElementById("acceso");
+const panel=document.getElementById("panel");
+const loginMessage=document.getElementById("mensajeLogin");
+const tabla=document.getElementById("pedidos");
+const botonEntrar=document.getElementById("botonEntrar");
+const resumen=document.getElementById("resumen");
+const mensajeGeneral=document.getElementById("mensajeGeneral");
 
 if(!window.supabase){
-loginMessage.textContent="Error: no se ha podido cargar Supabase.";
+loginMessage.textContent="No se ha podido cargar Supabase.";
 return;
 }
 
-const db = window.supabase.createClient(
-SUPABASE_URL,
-SUPABASE_KEY
-);
+const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
 function mostrarError(error){
-alert(error.message || String(error));
+alert(error.message||String(error));
 }
 
 function actualizarContador(data){
-
 const chopera=data.filter(p=>p.sorteo==="Chopera 55");
-
-let reservadas=0;
-let vendidas=0;
-let pendientes=0;
-let aprobados=0;
-let rechazados=0;
+let reservadas=0,vendidas=0,pendientes=0,aprobados=0,rechazados=0;
 
 chopera.forEach(p=>{
 const cantidad=Number(p.cantidad);
+if(!Number.isFinite(cantidad)||cantidad<0)throw new Error("Cantidad no válida.");
 
-if(!Number.isFinite(cantidad)||cantidad<0){
-throw new Error("Cantidad no válida.");
-}
-
-if(p.estado==="pendiente"){
-pendientes++;
-reservadas+=cantidad;
-}
-else if(p.estado==="aprobado"){
-aprobados++;
-vendidas+=cantidad;
-}
-else if(p.estado==="rechazado"){
-rechazados++;
-}
+if(p.estado==="pendiente"){pendientes++;reservadas+=cantidad;}
+else if(p.estado==="aprobado"){aprobados++;vendidas+=cantidad;}
+else if(p.estado==="rechazado"){rechazados++;}
 });
 
 const disponibles=TOTAL_PAPELETAS-reservadas-vendidas;
-
-if(disponibles<0){
-throw new Error("Se supera el límite de 1.000 papeletas.");
-}
+if(disponibles<0)throw new Error("Se supera el límite de 1.000 papeletas.");
 
 document.getElementById("reservadas").textContent=reservadas;
 document.getElementById("vendidas").textContent=vendidas;
 document.getElementById("disponibles").textContent=disponibles;
-
 document.getElementById("pedidosPendientes").textContent=pendientes;
 document.getElementById("pedidosAprobados").textContent=aprobados;
 document.getElementById("pedidosRechazados").textContent=rechazados;
 
 const porcentaje=vendidas/TOTAL_PAPELETAS*100;
-
 document.getElementById("barraVendidas").style.width=porcentaje+"%";
-document.getElementById("porcentajeVendidas").textContent=
-porcentaje.toFixed(1)+"% de las papeletas están vendidas.";
+document.getElementById("porcentajeVendidas").textContent=porcentaje.toFixed(1)+"% vendidas.";
 }
 
 function mostrarPanel(usuario){
 acceso.classList.add("oculto");
 panel.classList.remove("oculto");
-document.getElementById("sesion").textContent=
-"Administrador: "+usuario.email;
+document.getElementById("sesion").textContent="Administrador: "+usuario.email;
 }
 
 async function entrar(){
-
 botonEntrar.disabled=true;
 loginMessage.textContent="Comprobando acceso...";
 
 try{
-
 const email=document.getElementById("email").value.trim();
 const password=document.getElementById("password").value;
 
-if(!email||!password){
-throw new Error("Introduce tu correo y contraseña.");
-}
+if(!email||!password)throw new Error("Introduce correo y contraseña.");
 
-const {data,error}=await db.auth.signInWithPassword({
-email,password
-});
-
+const {data,error}=await db.auth.signInWithPassword({email,password});
 if(error)throw error;
 
 if(!data.user||data.user.id!==ADMIN_ID){
@@ -276,13 +229,11 @@ botonEntrar.disabled=false;
 }
 
 async function comprobarSesion(){
-
 try{
 const {data,error}=await db.auth.getSession();
 if(error)throw error;
 
 if(data.session){
-
 if(data.session.user.id===ADMIN_ID){
 mostrarPanel(data.session.user);
 await cargarPedidos();
@@ -295,16 +246,38 @@ loginMessage.textContent="Error: "+error.message;
 }
 }
 
-async function cargarPedidos(){
+function crearCelda(fila,valor){
+const td=document.createElement("td");
+td.textContent=valor??"";
+fila.appendChild(td);
+return td;
+}
 
+function crearBoton(texto,clase,accion,contenedor){
+const boton=document.createElement("button");
+boton.textContent=texto;
+if(clase)boton.className=clase;
+boton.onclick=accion;
+contenedor.appendChild(boton);
+return boton;
+}
+
+async function copiarCodigo(codigo){
+try{
+await navigator.clipboard.writeText(codigo);
+mensajeGeneral.textContent="Código copiado: "+codigo;
+}catch(error){
+prompt("Copia este número de justificante:",codigo);
+}
+}
+
+async function cargarPedidos(){
 tabla.innerHTML="";
 resumen.textContent="Cargando pedidos...";
 mensajeGeneral.textContent="";
 
 try{
-
 const {data:usuarioData,error:usuarioError}=await db.auth.getUser();
-
 if(usuarioError)throw usuarioError;
 
 if(!usuarioData.user||usuarioData.user.id!==ADMIN_ID){
@@ -312,8 +285,7 @@ await salir();
 return;
 }
 
-const {data,error}=await db
-.from("pedidos")
+const {data,error}=await db.from("pedidos")
 .select("*")
 .order("creado_en",{ascending:false});
 
@@ -321,148 +293,117 @@ if(error)throw error;
 
 actualizarContador(data);
 
-let pendientes=0;
-let aprobados=0;
-let rechazados=0;
+let pendientes=0,aprobados=0,rechazados=0;
 
 data.forEach(p=>{
-
 if(p.estado==="pendiente")pendientes++;
 if(p.estado==="aprobado")aprobados++;
 if(p.estado==="rechazado")rechazados++;
 
 const fila=document.createElement("tr");
 
-function celda(valor){
-const td=document.createElement("td");
-td.textContent=valor??"";
-fila.appendChild(td);
-return td;
+crearCelda(fila,p.nombre);
+crearCelda(fila,(p.telefono||"")+" | "+(p.email||""));
+crearCelda(fila,p.id);
+
+const celdaCodigo=crearCelda(fila,"");
+const codigo=String(p.codigo_seguimiento||"").trim();
+
+if(codigo){
+const texto=document.createElement("strong");
+texto.className="codigo";
+texto.textContent=codigo;
+celdaCodigo.appendChild(texto);
+
+crearBoton("📋 Copiar","azul",()=>copiarCodigo(codigo),celdaCodigo);
+
+crearBoton("🔎 Seguimiento","",()=>{
+window.open(URL_SEGUIMIENTO+"?codigo="+encodeURIComponent(codigo),"_blank");
+},celdaCodigo);
+}else{
+celdaCodigo.textContent="Todavía sin generar";
 }
 
-celda(p.nombre);
-celda((p.telefono||"")+" | "+(p.email||""));
+crearCelda(fila,p.sorteo);
+crearCelda(fila,p.cantidad);
+crearCelda(fila,p.total+" €");
+crearCelda(fila,p.metodo_pago);
 
-const referencia=celda(p.id);
-referencia.className="referencia";
-
-celda(p.sorteo);
-celda(p.cantidad);
-celda(p.total+" €");
-celda(p.metodo_pago);
-
-const estado=celda(p.estado);
+const estado=crearCelda(fila,p.estado);
 estado.className="estado";
 
-if(p.estado==="aprobado")estado.classList.add("verde");
+if(p.estado==="aprobado")estado.classList.add("verde-texto");
 if(p.estado==="rechazado")estado.classList.add("rojo-texto");
 
-celda(Array.isArray(p.numeros_papeletas)
+crearCelda(fila,Array.isArray(p.numeros_papeletas)
 ?p.numeros_papeletas.map(n=>String(n).padStart(4,"0")).join(", ")
 :"");
 
-celda(p.solicitar_papel?"Sí":"No");
+crearCelda(fila,p.solicitar_papel?"Sí":"No");
 
-const acciones=celda("");
+const acciones=crearCelda(fila,"");
 acciones.className="acciones";
 
 if(p.estado==="pendiente"&&p.sorteo==="Chopera 55"){
-
-const aprobar=document.createElement("button");
-aprobar.textContent="APROBAR";
-aprobar.onclick=()=>aprobarPedido(p.id);
-acciones.appendChild(aprobar);
-
-const rechazar=document.createElement("button");
-rechazar.textContent="RECHAZAR";
-rechazar.className="rojo";
-rechazar.onclick=()=>rechazarPedido(p.id);
-acciones.appendChild(rechazar);
-
-}else if(p.estado==="aprobado"){
-
-const reenviar=document.createElement("button");
-reenviar.textContent="📧 REENVIAR JUSTIFICANTE";
-reenviar.className="azul";
-reenviar.onclick=()=>reenviarJustificante(p.id,reenviar);
-acciones.appendChild(reenviar);
-
-}else{
+crearBoton("APROBAR","",()=>aprobarPedido(p.id),acciones);
+crearBoton("RECHAZAR","rojo",()=>rechazarPedido(p.id),acciones);
+}
+else if(p.estado==="aprobado"){
+crearBoton("📧 ENVIAR / REENVIAR JUSTIFICANTE","azul",
+()=>reenviarJustificante(p.id),acciones);
+}
+else{
 acciones.textContent="Sin acciones";
 }
 
 tabla.appendChild(fila);
 });
 
-resumen.textContent=
-"Pedidos: "+data.length+
+resumen.textContent="Pedidos: "+data.length+
 " | Pendientes: "+pendientes+
 " | Aprobados: "+aprobados+
 " | Rechazados: "+rechazados;
 
 }catch(error){
-
 resumen.textContent="Error al cargar pedidos: "+error.message;
 }
 }
 
-// APROBAR
 async function aprobarPedido(id){
-
 if(!confirm("¿Has comprobado el pago y quieres aprobar esta compra?"))return;
 
 try{
-
 const {data,error}=await db.rpc("aprobar_pedido",{p_id:id});
-
 if(error)throw error;
 
 alert("Compra aprobada.\nNúmeros asignados: "+data.join(", "));
 await cargarPedidos();
-
-}catch(error){
-mostrarError(error);
-}
+}catch(error){mostrarError(error);}
 }
 
-// RECHAZAR
 async function rechazarPedido(id){
-
 if(!confirm("¿Seguro que quieres rechazar este pedido?"))return;
 
 try{
-
 const {data,error}=await db.rpc("rechazar_pedido",{p_id:id});
-
 if(error)throw error;
 if(data!==true)throw new Error("No se confirmó el rechazo.");
 
-alert("Pedido rechazado correctamente.");
+alert("Pedido rechazado.");
 await cargarPedidos();
-
-}catch(error){
-mostrarError(error);
-}
+}catch(error){mostrarError(error);}
 }
 
-// REENVIAR JUSTIFICANTE SIN APROBAR DE NUEVO
-async function reenviarJustificante(id,boton){
+async function reenviarJustificante(id){
+if(!confirm("¿Quieres enviar el justificante al correo del comprador?"))return;
 
-if(!confirm(
-"¿Quieres enviar de nuevo el justificante PDF de este pedido aprobado?"
-))return;
-
-boton.disabled=true;
-boton.textContent="ENVIANDO...";
+mensajeGeneral.textContent="Preparando justificante...";
 
 try{
-
 const {data:sessionData,error:sessionError}=await db.auth.getSession();
-
 if(sessionError)throw sessionError;
 
 const session=sessionData.session;
-
 if(!session||session.user.id!==ADMIN_ID){
 throw new Error("La sesión de administrador no es válida.");
 }
@@ -477,8 +418,7 @@ headers:{
 "apikey":SUPABASE_KEY
 },
 body:JSON.stringify({pedido_id:id})
-}
-);
+});
 
 const resultado=await respuesta.json();
 
@@ -486,31 +426,30 @@ if(!respuesta.ok||!resultado.success){
 throw new Error(resultado.error||"No se pudo enviar el justificante.");
 }
 
-alert(
-"¡Justificante enviado correctamente!\n"+
-"Identificador de correo: "+resultado.email_id
-);
+const codigo=resultado.codigo_seguimiento;
+const destinatario=resultado.destinatario;
 
 mensajeGeneral.textContent=
-"Justificante enviado. ID: "+resultado.email_id;
+"¡Justificante enviado correctamente!"+
+"\nNúmero: "+codigo+
+"\nCorreo del comprador: "+destinatario;
+
+alert(
+"¡Justificante enviado!\n\n"+
+"Número de seguimiento: "+codigo+
+"\nCorreo: "+destinatario
+);
+
+await cargarPedidos();
 
 }catch(error){
-
-alert("Error al enviar el justificante: "+error.message);
-
-}finally{
-
-boton.disabled=false;
-boton.textContent="📧 REENVIAR JUSTIFICANTE";
-
+mensajeGeneral.textContent="Error: "+error.message;
+alert("Error al enviar: "+error.message);
 }
 }
 
-// CERRAR SESIÓN
 async function salir(){
-
 try{
-
 const {error}=await db.auth.signOut();
 if(error)throw error;
 
@@ -520,10 +459,7 @@ tabla.innerHTML="";
 resumen.textContent="";
 document.getElementById("password").value="";
 loginMessage.textContent="Sesión cerrada.";
-
-}catch(error){
-mostrarError(error);
-}
+}catch(error){mostrarError(error);}
 }
 
 botonEntrar.addEventListener("click",entrar);
@@ -534,6 +470,5 @@ comprobarSesion();
 
 })();
 </script>
-
 </body>
 </html>

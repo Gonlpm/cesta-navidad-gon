@@ -7,121 +7,42 @@
 
 <style>
 *{box-sizing:border-box}
-body{
-  font-family:Arial,sans-serif;
-  background:#f8f5ed;
-  margin:0;
-  color:#26382e
-}
-header{
-  background:#173d30;
-  color:white;
-  padding:25px;
-  text-align:center
-}
-main{max-width:1200px;margin:25px auto;padding:15px}
-.card{
-  background:white;
-  border-radius:12px;
-  padding:20px;
-  margin:15px 0;
-  box-shadow:0 3px 12px #00000010
-}
-input{
-  padding:12px;
-  width:100%;
-  margin:8px 0;
-  border:1px solid #ccc;
-  border-radius:7px
-}
-button{
-  padding:11px 16px;
-  background:#173d30;
-  color:white;
-  border:0;
-  border-radius:7px;
-  cursor:pointer;
-  margin:4px
-}
+body{font-family:Arial,sans-serif;background:#f8f5ed;margin:0;color:#26382e}
+header{background:#173d30;color:white;padding:25px;text-align:center}
+main{max-width:1300px;margin:25px auto;padding:15px}
+.card{background:white;border-radius:12px;padding:20px;margin:15px 0;box-shadow:0 3px 12px #00000010}
+input{padding:12px;width:100%;margin:8px 0;border:1px solid #ccc;border-radius:7px}
+button{padding:11px 16px;background:#173d30;color:white;border:0;border-radius:7px;cursor:pointer;margin:4px}
 button.rojo{background:#a52d2d}
+button.azul{background:#245b91}
 button:disabled{opacity:.5;cursor:not-allowed}
-table{width:100%;border-collapse:collapse;min-width:1050px}
-td,th{
-  padding:10px;
-  border-bottom:1px solid #ddd;
-  text-align:left;
-  vertical-align:top
-}
+table{width:100%;border-collapse:collapse;min-width:1350px}
+td,th{padding:10px;border-bottom:1px solid #ddd;text-align:left;vertical-align:top}
 th{background:#f0eee6}
 .oculto{display:none}
 .estado{font-weight:bold}
-#mensajeLogin{white-space:pre-wrap}
 .verde{color:#16713c}
 .rojo-texto{color:#b32626}
-.acciones{min-width:170px}
-.contadores{
-  display:grid;
-  grid-template-columns:repeat(4,minmax(0,1fr));
-  gap:12px;
-  margin:20px 0
-}
-.contador{
-  background:#f8f5ed;
-  padding:18px;
-  border-radius:10px;
-  border:1px solid #e5e0d4
-}
-.contador h3{
-  font-size:13px;
-  margin:0 0 12px;
-  color:#657267
-}
-.contador .numero{
-  font-size:30px;
-  font-weight:bold;
-  color:#173d30
-}
-.contador.disponibles .numero{color:#16713c}
-.contador.reservadas .numero{color:#b7791f}
-.estado-contador{
-  display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:12px;
-  margin-top:15px
-}
-.estado-caja{
-  background:#f8f5ed;
-  padding:15px;
-  border-radius:9px;
-  text-align:center
-}
-.estado-caja strong{
-  display:block;
-  font-size:25px;
-  margin-top:8px
-}
-.barra{
-  height:15px;
-  background:#e9e5dc;
-  border-radius:20px;
-  overflow:hidden;
-  margin-top:18px
-}
-.barra-progreso{
-  height:100%;
-  width:0%;
-  background:#16713c;
-  transition:width .3s
-}
-.nota{
-  color:#777;
-  font-size:13px;
-  margin-top:15px
-}
+.acciones{min-width:190px}
+.referencia{font-size:12px;max-width:190px;overflow-wrap:anywhere}
+.contadores{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:20px 0}
+.contador{background:#f8f5ed;padding:18px;border-radius:10px;border:1px solid #e5e0d4}
+.contador h3{font-size:13px;margin:0 0 12px;color:#657267}
+.numero{font-size:30px;font-weight:bold;color:#173d30}
+.disponibles .numero{color:#16713c}
+.reservadas .numero{color:#b7791f}
+.estado-contador{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:15px}
+.estado-caja{background:#f8f5ed;padding:15px;border-radius:9px;text-align:center}
+.estado-caja strong{display:block;font-size:25px;margin-top:8px}
+.barra{height:15px;background:#e9e5dc;border-radius:20px;overflow:hidden;margin-top:18px}
+.barra-progreso{height:100%;width:0%;background:#16713c;transition:width .3s}
+.nota{color:#777;font-size:13px;margin-top:15px}
+#mensajeLogin{white-space:pre-wrap}
+#mensajeGeneral{white-space:pre-wrap}
 @media(max-width:650px){
-  .contadores{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .estado-contador{grid-template-columns:1fr}
-  .contador .numero{font-size:25px}
+.contadores{grid-template-columns:repeat(2,minmax(0,1fr))}
+.estado-contador{grid-template-columns:1fr}
+.numero{font-size:25px}
 }
 </style>
 </head>
@@ -151,6 +72,7 @@ th{background:#f0eee6}
 <p id="sesion"></p>
 <button id="actualizar" type="button">🔄 Actualizar pedidos</button>
 <button id="botonSalir" class="rojo" type="button">Cerrar sesión</button>
+<p id="mensajeGeneral"></p>
 </div>
 
 <div class="card">
@@ -186,23 +108,22 @@ th{background:#f0eee6}
 <div class="barra">
 <div id="barraVendidas" class="barra-progreso"></div>
 </div>
+
 <p id="porcentajeVendidas" class="nota">Esperando datos de Supabase...</p>
-<p class="nota">
-Las papeletas pendientes cuentan como reservadas.
-Las aprobadas cuentan como vendidas.
-Los pedidos rechazados no consumen papeletas.
-</p>
+<p class="nota">Las papeletas pendientes cuentan como reservadas. Las aprobadas cuentan como vendidas. Los pedidos rechazados no consumen papeletas.</p>
 </div>
 
 <div class="card">
 <h2>📋 Solicitudes de papeletas</h2>
 <p id="resumen">Cargando...</p>
+
 <div style="overflow-x:auto">
 <table>
 <thead>
 <tr>
 <th>Cliente</th>
 <th>Contacto</th>
+<th>Referencia</th>
 <th>Sorteo</th>
 <th>Cantidad</th>
 <th>Total</th>
@@ -225,7 +146,6 @@ Los pedidos rechazados no consumen papeletas.
 
 <script>
 (function(){
-
 "use strict";
 
 const SUPABASE_URL =
@@ -245,328 +165,370 @@ const loginMessage = document.getElementById("mensajeLogin");
 const tabla = document.getElementById("pedidos");
 const botonEntrar = document.getElementById("botonEntrar");
 const resumen = document.getElementById("resumen");
+const mensajeGeneral = document.getElementById("mensajeGeneral");
 
 if(!window.supabase){
-  loginMessage.textContent="Error: no se ha podido cargar Supabase.";
-  botonEntrar.disabled=true;
-  return;
+loginMessage.textContent="Error: no se ha podido cargar Supabase.";
+return;
 }
 
 const db = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
+SUPABASE_URL,
+SUPABASE_KEY
 );
 
 function mostrarError(error){
-  alert(error.message || String(error));
+alert(error.message || String(error));
 }
 
 function actualizarContador(data){
 
-  const chopera=data.filter(p=>p.sorteo==="Chopera 55");
+const chopera=data.filter(p=>p.sorteo==="Chopera 55");
 
-  let reservadas=0;
-  let vendidas=0;
-  let pendientes=0;
-  let aprobados=0;
-  let rechazados=0;
+let reservadas=0;
+let vendidas=0;
+let pendientes=0;
+let aprobados=0;
+let rechazados=0;
 
-  chopera.forEach(p=>{
-    const cantidad=Number(p.cantidad);
+chopera.forEach(p=>{
+const cantidad=Number(p.cantidad);
 
-    if(p.estado==="pendiente"){
-      pendientes++;
-      reservadas+=cantidad;
-    }else if(p.estado==="aprobado"){
-      aprobados++;
-      vendidas+=cantidad;
-    }else if(p.estado==="rechazado"){
-      rechazados++;
-    }
-  });
+if(!Number.isFinite(cantidad)||cantidad<0){
+throw new Error("Cantidad no válida.");
+}
 
-  const disponibles=TOTAL_PAPELETAS-reservadas-vendidas;
+if(p.estado==="pendiente"){
+pendientes++;
+reservadas+=cantidad;
+}
+else if(p.estado==="aprobado"){
+aprobados++;
+vendidas+=cantidad;
+}
+else if(p.estado==="rechazado"){
+rechazados++;
+}
+});
 
-  if(disponibles<0){
-    throw new Error("Se han superado las 1.000 papeletas.");
-  }
+const disponibles=TOTAL_PAPELETAS-reservadas-vendidas;
 
-  document.getElementById("reservadas").textContent=reservadas;
-  document.getElementById("vendidas").textContent=vendidas;
-  document.getElementById("disponibles").textContent=disponibles;
+if(disponibles<0){
+throw new Error("Se supera el límite de 1.000 papeletas.");
+}
 
-  document.getElementById("pedidosPendientes").textContent=pendientes;
-  document.getElementById("pedidosAprobados").textContent=aprobados;
-  document.getElementById("pedidosRechazados").textContent=rechazados;
+document.getElementById("reservadas").textContent=reservadas;
+document.getElementById("vendidas").textContent=vendidas;
+document.getElementById("disponibles").textContent=disponibles;
 
-  const porcentaje=vendidas/TOTAL_PAPELETAS*100;
+document.getElementById("pedidosPendientes").textContent=pendientes;
+document.getElementById("pedidosAprobados").textContent=aprobados;
+document.getElementById("pedidosRechazados").textContent=rechazados;
 
-  document.getElementById("barraVendidas").style.width=porcentaje+"%";
-  document.getElementById("porcentajeVendidas").textContent=
-    porcentaje.toFixed(1)+"% de las papeletas están vendidas.";
+const porcentaje=vendidas/TOTAL_PAPELETAS*100;
+
+document.getElementById("barraVendidas").style.width=porcentaje+"%";
+document.getElementById("porcentajeVendidas").textContent=
+porcentaje.toFixed(1)+"% de las papeletas están vendidas.";
 }
 
 function mostrarPanel(usuario){
-  acceso.classList.add("oculto");
-  panel.classList.remove("oculto");
-  document.getElementById("sesion").textContent=
-    "Administrador: "+usuario.email;
+acceso.classList.add("oculto");
+panel.classList.remove("oculto");
+document.getElementById("sesion").textContent=
+"Administrador: "+usuario.email;
 }
 
 async function entrar(){
 
-  botonEntrar.disabled=true;
-  loginMessage.textContent="Comprobando acceso...";
+botonEntrar.disabled=true;
+loginMessage.textContent="Comprobando acceso...";
 
-  try{
-    const email=document.getElementById("email").value.trim();
-    const password=document.getElementById("password").value;
+try{
 
-    if(!email||!password){
-      throw new Error("Introduce tu correo y contraseña.");
-    }
+const email=document.getElementById("email").value.trim();
+const password=document.getElementById("password").value;
 
-    const {data,error}=await db.auth.signInWithPassword({
-      email,password
-    });
+if(!email||!password){
+throw new Error("Introduce tu correo y contraseña.");
+}
 
-    if(error)throw error;
+const {data,error}=await db.auth.signInWithPassword({
+email,password
+});
 
-    if(!data.user||data.user.id!==ADMIN_ID){
-      await db.auth.signOut();
-      throw new Error("Esta cuenta no está autorizada.");
-    }
+if(error)throw error;
 
-    loginMessage.textContent="";
-    mostrarPanel(data.user);
-    await cargarPedidos();
+if(!data.user||data.user.id!==ADMIN_ID){
+await db.auth.signOut();
+throw new Error("Esta cuenta no está autorizada.");
+}
 
-  }catch(error){
-    loginMessage.textContent="Error de acceso: "+error.message;
-  }finally{
-    botonEntrar.disabled=false;
-  }
+loginMessage.textContent="";
+mostrarPanel(data.user);
+await cargarPedidos();
+
+}catch(error){
+loginMessage.textContent="Error de acceso: "+error.message;
+}finally{
+botonEntrar.disabled=false;
+}
 }
 
 async function comprobarSesion(){
 
-  try{
-    const {data,error}=await db.auth.getSession();
-    if(error)throw error;
+try{
+const {data,error}=await db.auth.getSession();
+if(error)throw error;
 
-    if(data.session){
-      if(data.session.user.id===ADMIN_ID){
-        mostrarPanel(data.session.user);
-        await cargarPedidos();
-      }else{
-        await db.auth.signOut();
-      }
-    }
-  }catch(error){
-    loginMessage.textContent="Error al comprobar sesión: "+error.message;
-  }
+if(data.session){
+
+if(data.session.user.id===ADMIN_ID){
+mostrarPanel(data.session.user);
+await cargarPedidos();
+}else{
+await db.auth.signOut();
+}
+}
+}catch(error){
+loginMessage.textContent="Error: "+error.message;
+}
 }
 
 async function cargarPedidos(){
 
-  tabla.innerHTML="";
-  resumen.textContent="Cargando pedidos...";
+tabla.innerHTML="";
+resumen.textContent="Cargando pedidos...";
+mensajeGeneral.textContent="";
 
-  try{
-    const {data:usuarioData,error:usuarioError}=await db.auth.getUser();
-    if(usuarioError)throw usuarioError;
+try{
 
-    if(!usuarioData.user||usuarioData.user.id!==ADMIN_ID){
-      await salir();
-      return;
-    }
+const {data:usuarioData,error:usuarioError}=await db.auth.getUser();
 
-    const {data,error}=await db
-      .from("pedidos")
-      .select("*")
-      .order("creado_en",{ascending:false});
+if(usuarioError)throw usuarioError;
 
-    if(error)throw error;
-
-    actualizarContador(data);
-
-    let pendientes=0,aprobados=0,rechazados=0;
-
-    data.forEach(p=>{
-
-      if(p.estado==="pendiente")pendientes++;
-      if(p.estado==="aprobado")aprobados++;
-      if(p.estado==="rechazado")rechazados++;
-
-      const fila=document.createElement("tr");
-
-      function celda(valor){
-        const td=document.createElement("td");
-        td.textContent=valor??"";
-        fila.appendChild(td);
-        return td;
-      }
-
-      celda(p.nombre);
-      celda((p.telefono||"")+" | "+(p.email||""));
-      celda(p.sorteo);
-      celda(p.cantidad);
-      celda(p.total+" €");
-      celda(p.metodo_pago);
-
-      const estado=celda(p.estado);
-      estado.className="estado";
-
-      if(p.estado==="aprobado")estado.classList.add("verde");
-      if(p.estado==="rechazado")estado.classList.add("rojo-texto");
-
-      celda(Array.isArray(p.numeros_papeletas)?
-        p.numeros_papeletas.join(", "):"");
-
-      celda(p.solicitar_papel?"Sí":"No");
-
-      const acciones=celda("");
-      acciones.className="acciones";
-
-      if(p.estado==="pendiente"&&p.sorteo==="Chopera 55"){
-
-        const aprobar=document.createElement("button");
-        aprobar.textContent="APROBAR";
-        aprobar.onclick=()=>aprobarPedido(p.id);
-        acciones.appendChild(aprobar);
-
-        const rechazar=document.createElement("button");
-        rechazar.textContent="RECHAZAR";
-        rechazar.className="rojo";
-        rechazar.onclick=()=>rechazarPedido(p.id);
-        acciones.appendChild(rechazar);
-
-      }else{
-        acciones.textContent="Sin acciones";
-      }
-
-      tabla.appendChild(fila);
-    });
-
-    resumen.textContent=
-      "Pedidos: "+data.length+
-      " | Pendientes: "+pendientes+
-      " | Aprobados: "+aprobados+
-      " | Rechazados: "+rechazados;
-
-  }catch(error){
-    resumen.textContent="Error al cargar pedidos: "+error.message;
-  }
+if(!usuarioData.user||usuarioData.user.id!==ADMIN_ID){
+await salir();
+return;
 }
 
-// APROBAR Y ENVIAR JUSTIFICANTE
+const {data,error}=await db
+.from("pedidos")
+.select("*")
+.order("creado_en",{ascending:false});
+
+if(error)throw error;
+
+actualizarContador(data);
+
+let pendientes=0;
+let aprobados=0;
+let rechazados=0;
+
+data.forEach(p=>{
+
+if(p.estado==="pendiente")pendientes++;
+if(p.estado==="aprobado")aprobados++;
+if(p.estado==="rechazado")rechazados++;
+
+const fila=document.createElement("tr");
+
+function celda(valor){
+const td=document.createElement("td");
+td.textContent=valor??"";
+fila.appendChild(td);
+return td;
+}
+
+celda(p.nombre);
+celda((p.telefono||"")+" | "+(p.email||""));
+
+const referencia=celda(p.id);
+referencia.className="referencia";
+
+celda(p.sorteo);
+celda(p.cantidad);
+celda(p.total+" €");
+celda(p.metodo_pago);
+
+const estado=celda(p.estado);
+estado.className="estado";
+
+if(p.estado==="aprobado")estado.classList.add("verde");
+if(p.estado==="rechazado")estado.classList.add("rojo-texto");
+
+celda(Array.isArray(p.numeros_papeletas)
+?p.numeros_papeletas.map(n=>String(n).padStart(4,"0")).join(", ")
+:"");
+
+celda(p.solicitar_papel?"Sí":"No");
+
+const acciones=celda("");
+acciones.className="acciones";
+
+if(p.estado==="pendiente"&&p.sorteo==="Chopera 55"){
+
+const aprobar=document.createElement("button");
+aprobar.textContent="APROBAR";
+aprobar.onclick=()=>aprobarPedido(p.id);
+acciones.appendChild(aprobar);
+
+const rechazar=document.createElement("button");
+rechazar.textContent="RECHAZAR";
+rechazar.className="rojo";
+rechazar.onclick=()=>rechazarPedido(p.id);
+acciones.appendChild(rechazar);
+
+}else if(p.estado==="aprobado"){
+
+const reenviar=document.createElement("button");
+reenviar.textContent="📧 REENVIAR JUSTIFICANTE";
+reenviar.className="azul";
+reenviar.onclick=()=>reenviarJustificante(p.id,reenviar);
+acciones.appendChild(reenviar);
+
+}else{
+acciones.textContent="Sin acciones";
+}
+
+tabla.appendChild(fila);
+});
+
+resumen.textContent=
+"Pedidos: "+data.length+
+" | Pendientes: "+pendientes+
+" | Aprobados: "+aprobados+
+" | Rechazados: "+rechazados;
+
+}catch(error){
+
+resumen.textContent="Error al cargar pedidos: "+error.message;
+}
+}
+
+// APROBAR
 async function aprobarPedido(id){
 
-  if(!confirm("¿Has comprobado el pago y quieres aprobar esta compra?"))
-    return;
+if(!confirm("¿Has comprobado el pago y quieres aprobar esta compra?"))return;
 
-  try{
+try{
 
-    const {data,error}=await db.rpc(
-      "aprobar_pedido",
-      {p_id:id}
-    );
+const {data,error}=await db.rpc("aprobar_pedido",{p_id:id});
 
-    if(error)throw error;
+if(error)throw error;
 
-    const numeros=Array.isArray(data)?data.join(", "):String(data);
+alert("Compra aprobada.\nNúmeros asignados: "+data.join(", "));
+await cargarPedidos();
 
-    // Obtener la sesión real del administrador
-    const {data:sesionData,error:sesionError}=await db.auth.getSession();
-
-    if(sesionError)throw sesionError;
-
-    if(!sesionData.session){
-      throw new Error("La sesión ha caducado. Vuelve a iniciar sesión.");
-    }
-
-    // Solicitar el envío del justificante PDF
-    const {data:envioData,error:envioError}=await db.functions.invoke(
-      "enviar-justificante",
-      {
-        body:{pedido_id:id}
-      }
-    );
-
-    if(envioError){
-      alert(
-        "PEDIDO APROBADO.\nNúmeros: "+numeros+
-        "\n\nNo se pudo enviar el justificante: "+
-        envioError.message
-      );
-    }else if(!envioData||!envioData.success){
-      alert(
-        "PEDIDO APROBADO.\nNúmeros: "+numeros+
-        "\n\nError de correo: "+
-        (envioData?.error||"Error desconocido")
-      );
-    }else{
-      alert(
-        "¡PEDIDO APROBADO!\nNúmeros: "+numeros+
-        "\n\nJustificante enviado al correo del comprador."
-      );
-    }
-
-    await cargarPedidos();
-
-  }catch(error){
-    mostrarError(error);
-    await cargarPedidos();
-  }
+}catch(error){
+mostrarError(error);
+}
 }
 
+// RECHAZAR
 async function rechazarPedido(id){
 
-  if(!confirm("¿Seguro que quieres rechazar este pedido?"))
-    return;
+if(!confirm("¿Seguro que quieres rechazar este pedido?"))return;
 
-  try{
-    const {data,error}=await db.rpc(
-      "rechazar_pedido",
-      {p_id:id}
-    );
+try{
 
-    if(error)throw error;
-    if(data!==true)throw new Error("No se confirmó el rechazo.");
+const {data,error}=await db.rpc("rechazar_pedido",{p_id:id});
 
-    alert("Pedido rechazado correctamente.");
-    await cargarPedidos();
+if(error)throw error;
+if(data!==true)throw new Error("No se confirmó el rechazo.");
 
-  }catch(error){
-    mostrarError(error);
-  }
+alert("Pedido rechazado correctamente.");
+await cargarPedidos();
+
+}catch(error){
+mostrarError(error);
+}
 }
 
+// REENVIAR JUSTIFICANTE SIN APROBAR DE NUEVO
+async function reenviarJustificante(id,boton){
+
+if(!confirm(
+"¿Quieres enviar de nuevo el justificante PDF de este pedido aprobado?"
+))return;
+
+boton.disabled=true;
+boton.textContent="ENVIANDO...";
+
+try{
+
+const {data:sessionData,error:sessionError}=await db.auth.getSession();
+
+if(sessionError)throw sessionError;
+
+const session=sessionData.session;
+
+if(!session||session.user.id!==ADMIN_ID){
+throw new Error("La sesión de administrador no es válida.");
+}
+
+const respuesta=await fetch(
+SUPABASE_URL+"/functions/v1/enviar-justificante",
+{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+"Authorization":"Bearer "+session.access_token,
+"apikey":SUPABASE_KEY
+},
+body:JSON.stringify({pedido_id:id})
+}
+);
+
+const resultado=await respuesta.json();
+
+if(!respuesta.ok||!resultado.success){
+throw new Error(resultado.error||"No se pudo enviar el justificante.");
+}
+
+alert(
+"¡Justificante enviado correctamente!\n"+
+"Identificador de correo: "+resultado.email_id
+);
+
+mensajeGeneral.textContent=
+"Justificante enviado. ID: "+resultado.email_id;
+
+}catch(error){
+
+alert("Error al enviar el justificante: "+error.message);
+
+}finally{
+
+boton.disabled=false;
+boton.textContent="📧 REENVIAR JUSTIFICANTE";
+
+}
+}
+
+// CERRAR SESIÓN
 async function salir(){
 
-  try{
-    const {error}=await db.auth.signOut();
-    if(error)throw error;
+try{
 
-    panel.classList.add("oculto");
-    acceso.classList.remove("oculto");
-    tabla.innerHTML="";
-    resumen.textContent="";
-    document.getElementById("password").value="";
-    loginMessage.textContent="Sesión cerrada.";
+const {error}=await db.auth.signOut();
+if(error)throw error;
 
-  }catch(error){
-    mostrarError(error);
-  }
+panel.classList.add("oculto");
+acceso.classList.remove("oculto");
+tabla.innerHTML="";
+resumen.textContent="";
+document.getElementById("password").value="";
+loginMessage.textContent="Sesión cerrada.";
+
+}catch(error){
+mostrarError(error);
+}
 }
 
 botonEntrar.addEventListener("click",entrar);
-
-document.getElementById("actualizar")
-.addEventListener("click",cargarPedidos);
-
-document.getElementById("botonSalir")
-.addEventListener("click",salir);
+document.getElementById("actualizar").addEventListener("click",cargarPedidos);
+document.getElementById("botonSalir").addEventListener("click",salir);
 
 comprobarSesion();
 

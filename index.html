@@ -107,7 +107,25 @@ que forman parte de cada cesta.</p>
 <p>Rellena tus datos para solicitar tus papeletas.
 Tu pedido quedará pendiente hasta que se compruebe el pago.</p>
 
-<form id="pedidoForm">
+<div id="accesoCliente" class="aviso">
+<h3>🔐 Acceso obligatorio de clientes</h3>
+<p>Para comprar papeletas primero debes registrarte en el formulario oficial y después iniciar sesión con el correo y la contraseña de tu cuenta de cliente.</p>
+<a class="boton" href="https://forms.gle/fAcr1N7vPBwVSmUH7" target="_blank" rel="noopener">📝 Registrarme</a>
+<form id="loginCliente" style="margin-top:18px">
+<label for="loginEmail">Correo electrónico registrado</label>
+<input id="loginEmail" type="email" autocomplete="email" required>
+<label for="loginPassword">Contraseña</label>
+<input id="loginPassword" type="password" autocomplete="current-password" required>
+<button type="submit" id="loginBtn">INICIAR SESIÓN</button>
+</form>
+<p id="loginMensaje" role="status"></p>
+<button type="button" id="recuperarBtn" class="verde">He olvidado mi contraseña</button>
+</div>
+<div id="sesionCliente" style="display:none" class="aviso">
+<p>Sesión de cliente iniciada: <strong id="correoCliente"></strong></p>
+<button type="button" id="salirCliente" class="verde">CERRAR SESIÓN</button>
+</div>
+<form id="pedidoForm" style="display:none">
 <input type="hidden" id="sorteo" value="Chopera 55">
 
 <label for="nombre">Nombre y apellidos</label>
@@ -175,6 +193,63 @@ const supabaseClient = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_ANON_KEY
 );
+
+// ACCESO OBLIGATORIO PARA COMPRAR
+const accesoCliente = document.getElementById("accesoCliente");
+const sesionCliente = document.getElementById("sesionCliente");
+const pedidoForm = document.getElementById("pedidoForm");
+const loginMensaje = document.getElementById("loginMensaje");
+
+async function actualizarSesionCliente() {
+  const { data } = await supabaseClient.auth.getSession();
+  const session = data.session;
+  accesoCliente.style.display = session ? "none" : "block";
+  sesionCliente.style.display = session ? "block" : "none";
+  pedidoForm.style.display = session ? "block" : "none";
+  document.getElementById("correoCliente").textContent =
+    session && session.user ? session.user.email : "";
+}
+
+document.getElementById("loginCliente").addEventListener("submit", async function(e) {
+  e.preventDefault();
+  const btn = document.getElementById("loginBtn");
+  btn.disabled = true;
+  loginMensaje.textContent = "Comprobando acceso...";
+  const { error } = await supabaseClient.auth.signInWithPassword({
+    email: document.getElementById("loginEmail").value.trim(),
+    password: document.getElementById("loginPassword").value
+  });
+  btn.disabled = false;
+  if (error) {
+    loginMensaje.textContent = "No se ha podido iniciar sesión. Comprueba tu correo y contraseña o recupera tu contraseña.";
+    return;
+  }
+  loginMensaje.textContent = "";
+  await actualizarSesionCliente();
+});
+
+document.getElementById("recuperarBtn").addEventListener("click", async function() {
+  const email = document.getElementById("loginEmail").value.trim();
+  if (!email) {
+    loginMensaje.textContent = "Escribe primero tu correo electrónico.";
+    return;
+  }
+  const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin + window.location.pathname
+  });
+  loginMensaje.textContent = error
+    ? "No se pudo enviar el correo de recuperación. Comprueba la configuración de correo de Supabase."
+    : "Si la cuenta existe, recibirás un enlace para recuperar tu contraseña.";
+});
+
+document.getElementById("salirCliente").addEventListener("click", async function() {
+  await supabaseClient.auth.signOut();
+  await actualizarSesionCliente();
+});
+supabaseClient.auth.onAuthStateChange(function() {
+  actualizarSesionCliente();
+});
+actualizarSesionCliente();
 
 // PRODUCTOS
 const productosChopera = [];
@@ -250,6 +325,12 @@ document.getElementById("pedidoForm").addEventListener("submit", async function(
 
   const resultado = document.getElementById("resultado");
   const boton = document.getElementById("enviar");
+  const { data: sesionActual } = await supabaseClient.auth.getSession();
+  if (!sesionActual.session) {
+    alert("Para comprar papeletas debes iniciar sesión como cliente.");
+    await actualizarSesionCliente();
+    return;
+  }
   const cantidad = Number(cantidadInput.value);
 
   if (!Number.isInteger(cantidad) || cantidad < 1 || cantidad > 1000) {

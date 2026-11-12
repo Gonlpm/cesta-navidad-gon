@@ -53,7 +53,7 @@ small{color:#6c6257}
 <a href="#sorteos">Sorteos</a>
 <a href="#productos">Productos</a>
 <a href="#comprar">Comprar papeletas</a>
-<a href="cliente.html">Mi panel de cliente</a>
+<a href="clientes.html">Mi panel de cliente</a>
 </nav>
 
 <main>
@@ -334,7 +334,7 @@ document.getElementById("loginCliente").addEventListener("submit", async functio
   }
   loginMensaje.textContent = "";
   const { data: usuario } = await supabaseClient.auth.getUser();
-  window.location.replace(usuario.user && usuario.user.id === ADMIN_ID ? "admin.html" : "cliente.html");
+  window.location.replace(usuario.user && usuario.user.id === ADMIN_ID ? "admin.html" : "clientes.html");
 });
 
 document.getElementById("recuperarBtn").addEventListener("click", async function() {

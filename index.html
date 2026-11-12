@@ -333,7 +333,8 @@ document.getElementById("loginCliente").addEventListener("submit", async functio
     return;
   }
   loginMensaje.textContent = "";
-  window.location.replace("cliente.html");
+  const { data: usuario } = await supabaseClient.auth.getUser();
+  window.location.replace(usuario.user && usuario.user.id === ADMIN_ID ? "admin.html" : "cliente.html");
 });
 
 document.getElementById("recuperarBtn").addEventListener("click", async function() {

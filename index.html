@@ -134,6 +134,10 @@ Tu pedido quedará pendiente hasta que se compruebe el pago.</p>
 <a class="boton verde" href="https://script.google.com/macros/s/AKfycbw6E_cldHlYzbWADdavE55xu5vBrLFWBlFmpBPx3aosLMNaRHXXQr997A5RsLmRNH8/exec" target="_blank" rel="noopener">📦 VER SEGUIMIENTO DE MIS PEDIDOS</a>
 </div>
 <div class="card">
+<h3>🧾 Mis compras</h3>
+<div id="misCompras">Cargando compras...</div>
+</div>
+<div class="card">
 <h3>💬 Mensajes, ofertas y promociones</h3>
 <div id="bandejaMensajes">Cargando mensajes...</div>
 </div>
@@ -281,6 +285,29 @@ async function cargarFichaYMensajes() {
     item.append(titulo,fecha,texto);
     bandeja.appendChild(item);
   });
+
+  const compras = document.getElementById("misCompras");
+  const { data: pedidos, error: errorPedidos } = await supabaseClient
+    .from("pedidos")
+    .select("id,sorteo,cantidad,total,estado,numeros_papeletas,codigo_seguimiento,creado_en")
+    .order("creado_en",{ascending:false});
+  if (errorPedidos) {
+    compras.textContent = "No se pudieron cargar tus compras.";
+  } else if (!pedidos || pedidos.length === 0) {
+    compras.textContent = "Todavía no tienes compras registradas.";
+  } else {
+    compras.replaceChildren();
+    pedidos.forEach(function(p) {
+      const fila = document.createElement("article");
+      fila.style.cssText = "border-bottom:1px solid #eadfc9;padding:10px 0";
+      const resumen = document.createElement("strong");
+      resumen.textContent = p.sorteo + " · " + p.cantidad + " papeleta(s) · " + Number(p.total).toFixed(2) + " €";
+      const detalle = document.createElement("p");
+      detalle.textContent = "Estado: " + p.estado + " · Seguimiento: " + (p.codigo_seguimiento || "Pendiente") + " · Números: " + (Array.isArray(p.numeros_papeletas) ? p.numeros_papeletas.join(", ") : "Pendientes");
+      fila.append(resumen,detalle);
+      compras.appendChild(fila);
+    });
+  }
 }
 
 document.getElementById("loginCliente").addEventListener("submit", async function(e) {

@@ -53,6 +53,7 @@ small{color:#6c6257}
 <a href="#sorteos">Sorteos</a>
 <a href="#productos">Productos</a>
 <a href="#comprar">Comprar papeletas</a>
+<a href="cliente.html">Mi panel de cliente</a>
 </nav>
 
 <main>
@@ -217,17 +218,27 @@ const sesionCliente = document.getElementById("sesionCliente");
 const pedidoForm = document.getElementById("pedidoForm");
 const loginMensaje = document.getElementById("loginMensaje");
 
+const ADMIN_ID = "68399dc3-5c6b-4705-b04a-eedcabb3bdb2";
 async function actualizarSesionCliente() {
   const { data } = await supabaseClient.auth.getSession();
   const session = data.session;
+  if (session && session.user && session.user.id === ADMIN_ID) {
+    window.location.replace("admin.html");
+    return;
+  }
+  if (session && session.user) {
+    window.location.replace("cliente.html");
+    return;
+  }
   accesoCliente.style.display = session ? "none" : "block";
   sesionCliente.style.display = session ? "block" : "none";
-  pedidoForm.style.display = session ? "block" : "none";
-  document.getElementById("panelCliente").style.display = session ? "block" : "none";
+  pedidoForm.style.display = "none";
+  document.getElementById("panelCliente").style.display = "none";
   document.getElementById("correoCliente").textContent =
     session && session.user ? session.user.email : "";
   if (session) {
-    await cargarFichaYMensajes();
+    accesoCliente.style.display = "block";
+    loginMensaje.textContent = "Abriendo tu panel...";
   } else {
     document.getElementById("miCodigo").textContent = "—";
     document.getElementById("miNombre").textContent = "—";
@@ -325,7 +336,7 @@ document.getElementById("loginCliente").addEventListener("submit", async functio
     return;
   }
   loginMensaje.textContent = "";
-  await actualizarSesionCliente();
+  window.location.replace("cliente.html");
 });
 
 document.getElementById("recuperarBtn").addEventListener("click", async function() {

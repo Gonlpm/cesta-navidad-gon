@@ -83,6 +83,25 @@ th{background:#f0eee6}
 </div>
 
 <div class="card">
+<h2>💬 Mensajes directos a clientes</h2>
+<p>Envía mensajes, ofertas o promociones a un cliente usando su código GON. El mensaje aparecerá en su panel de cliente.</p>
+<label for="destinatarioGON">Código de cliente</label>
+<input id="destinatarioGON" placeholder="GON-0001" autocomplete="off">
+<label for="tipoMensaje">Tipo de mensaje</label>
+<select id="tipoMensaje" style="padding:12px;width:100%;margin:8px 0;border:1px solid #ccc;border-radius:7px">
+<option value="mensaje">Mensaje</option>
+<option value="oferta">Oferta</option>
+<option value="promocion">Promoción</option>
+</select>
+<label for="asuntoMensaje">Asunto</label>
+<input id="asuntoMensaje" placeholder="Ej. Oferta especial de Navidad">
+<label for="textoMensaje">Mensaje</label>
+<textarea id="textoMensaje" rows="4" style="width:100%;padding:12px;border:1px solid #ccc;border-radius:7px"></textarea>
+<button id="enviarMensajeCliente" class="azul" type="button">📨 ENVIAR AL PANEL DEL CLIENTE</button>
+<p id="estadoMensajeCliente" role="status"></p>
+</div>
+
+<div class="card">
 <h2>🎟️ Control de papeletas — Chopera 55</h2>
 <p>Total de papeletas: <strong>1.000</strong></p>
 
@@ -469,6 +488,29 @@ document.getElementById("password").value="";
 loginMessage.textContent="Sesión cerrada.";
 }catch(error){mostrarError(error);}
 }
+
+document.getElementById("enviarMensajeCliente").addEventListener("click",async function(){
+const codigo=document.getElementById("destinatarioGON").value.trim().toUpperCase();
+const asunto=document.getElementById("asuntoMensaje").value.trim();
+const mensaje=document.getElementById("textoMensaje").value.trim();
+const tipo=document.getElementById("tipoMensaje").value;
+const estado=document.getElementById("estadoMensajeCliente");
+const boton=this;
+if(!/^GON-\\d{4,}$/.test(codigo)){estado.textContent="Introduce un código válido, por ejemplo GON-0001.";return;}
+if(!asunto||!mensaje){estado.textContent="Escribe un asunto y un mensaje.";return;}
+boton.disabled=true;estado.textContent="Enviando...";
+try{
+const {data:cliente,error:errCliente}=await db.from("clientes").select("codigo_cliente").eq("codigo_cliente",codigo).eq("activo",true).maybeSingle();
+if(errCliente)throw errCliente;
+if(!cliente)throw new Error("No existe un cliente activo con ese código.");
+const {error}=await db.from("mensajes_clientes").insert({codigo_cliente:codigo,asunto:asunto,mensaje:mensaje,tipo:tipo});
+if(error)throw error;
+estado.textContent="Mensaje enviado al buzón del cliente "+codigo+".";
+document.getElementById("asuntoMensaje").value="";
+document.getElementById("textoMensaje").value="";
+}catch(error){estado.textContent="No se pudo enviar: "+error.message;}
+finally{boton.disabled=false;}
+});
 
 botonEntrar.addEventListener("click",entrar);
 document.getElementById("actualizar").addEventListener("click",cargarPedidos);

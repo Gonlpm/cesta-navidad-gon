@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Mi panel | Cesta de Gon</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f8f5ed;color:#26382e;font-family:Arial,sans-serif}header{background:linear-gradient(120deg,#173d30,#28684b);color:white;text-align:center;padding:28px 15px;border-bottom:4px solid #d6ad58}main{max-width:1050px;margin:24px auto;padding:14px}.card{background:white;border-radius:13px;padding:20px;margin:15px 0;box-shadow:0 3px 12px #0001}button,.btn{display:inline-block;background:#8e1725;color:white;padding:11px 15px;border:0;border-radius:7px;text-decoration:none;cursor:pointer;font-weight:bold;margin:4px}input{display:block;width:100%;padding:12px;margin:8px 0 15px;border:1px solid #ccc;border-radius:7px}.muted{color:#68736c}.pedido{border:1px solid #e5e0d4;padding:15px;border-radius:10px;margin:12px 0;background:#fffdf8}.dato{margin:7px 0;overflow-wrap:anywhere}.pill{display:inline-block;padding:5px 9px;border-radius:20px;background:#edf3ed}.hidden{display:none}nav{text-align:center;padding:12px}nav a{color:#173d30;margin:8px}
+</style></head><body>
+<header><h1>👤 Mi panel de cliente</h1><p>III Edición · Cesta de Navidad de Gon</p></header>
+<nav><a href="index.html">Volver a la página principal</a> <a href="admin.html">Acceso administrador</a></nav>
+<main>
+<section id="acceso" class="card"><h2>🔐 Acceso de clientes</h2><p>Inicia sesión con el correo y la contraseña de tu cuenta.</p>
+<form id="login"><label>Correo electrónico</label><input id="email" type="email" autocomplete="username" required><label>Contraseña</label><input id="password" type="password" autocomplete="current-password" required><button id="entrar">INICIAR SESIÓN</button></form>
+<button id="recuperar">He olvidado mi contraseña</button><a class="btn" href="https://forms.gle/fAcr1N7vPBwVSmUH7" target="_blank" rel="noopener">Registrarme</a><p id="error" role="status"></p></section>
+<section id="panel" class="hidden">
+<div class="card"><h2>¡Bienvenido/a!</h2><p id="saludo"></p><p class="dato"><b>Código de cliente:</b> <span id="codigo">Cargando...</span></p><p class="dato"><b>Nombre:</b> <span id="nombre">—</span></p><p class="dato"><b>Correo:</b> <span id="correo">—</span></p><p class="dato"><b>Cuenta:</b> <span class="pill">Activa</span></p><button id="salir">Cerrar sesión</button></div>
+<div class="card"><h2>🎟️ Mis compras y papeletas</h2><p class="muted">Aquí puedes consultar el estado, tus números y el seguimiento individual de cada pedido.</p><div id="compras">Cargando...</div></div>
+<div class="card"><h2>💬 Mi bandeja de mensajes</h2><div id="mensajes">Cargando...</div></div>
+<div class="card"><h2>🛍️ Comprar papeletas</h2><p>Las compras se realizan desde la página principal y requieren iniciar sesión.</p><a class="btn" href="index.html#comprar">Ir a comprar papeletas</a></div>
+</section></main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>
+(function(){
+const URL="https://dfbsbbzvxuqypeowtvld.supabase.co",KEY="sb_publishable_TMJmvhwo-K8fnBhAOGEryg_XWHetqoZ",ADMIN="68399dc3-5c6b-4705-b04a-eedcabb3bdb2";
+const db=supabase.createClient(URL,KEY),$=id=>document.getElementById(id);
+function showError(t){$("error").textContent=t}
+async function routeSession(){
+ const {data:{session}}=await db.auth.getSession();
+ if(!session){$("acceso").classList.remove("hidden");$("panel").classList.add("hidden");return}
+ if(session.user.id===ADMIN){location.replace("admin.html");return}
+ $("acceso").classList.add("hidden");$("panel").classList.remove("hidden");
+ await loadPanel(session.user);
+}
+$("login").addEventListener("submit",async e=>{
+ e.preventDefault();$("entrar").disabled=true;showError("Comprobando...");
+ const {data,error}=await db.auth.signInWithPassword({email:$("email").value.trim(),password:$("password").value});
+ $("entrar").disabled=false;
+ if(error){showError("No se pudo iniciar sesión. Revisa tus datos.");return}
+ if(data.user.id===ADMIN){location.replace("admin.html");return}
+ await routeSession();
+});
+$("recuperar").addEventListener("click",async()=>{
+ const email=$("email").value.trim();if(!email){showError("Escribe tu correo primero.");return}
+ const {error}=await db.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});
+ showError(error?"No se pudo enviar el correo de recuperación.":"Si la cuenta existe, recibirás un enlace para recuperar la contraseña.");
+});
+$("salir").addEventListener("click",async()=>{await db.auth.signOut();await routeSession()});
+async function loadPanel(user){
+ $("saludo").textContent="Sesión iniciada: "+(user.email||"");
+ $("correo").textContent=user.email||"";
+ const {data:c,error:ce}=await db.from("clientes").select("codigo_cliente,nombre,apellidos,email").eq("auth_user_id",user.id).eq("activo",true).maybeSingle();
+ if(ce){$("codigo").textContent="No disponible";$("nombre").textContent=ce.message;return}
+ if(!c){$("codigo").textContent="Pendiente de vinculación";$("nombre").textContent="Tu cuenta todavía no está vinculada a un registro GON.";return}
+ $("codigo").textContent=c.codigo_cliente;$("nombre").textContent=[c.nombre,c.apellidos].filter(Boolean).join(" ");
+ const {data:orders,error:oe}=await db.from("pedidos").select("id,sorteo,cantidad,total,estado,numeros_papeletas,codigo_seguimiento,creado_en,metodo_pago,solicitar_papel").eq("email",c.email).order("creado_en",{ascending:false});
+ const box=$("compras");box.replaceChildren();
+ if(oe){box.textContent="No se pudieron cargar las compras: "+oe.message;return}
+ if(!orders?.length){box.textContent="Todavía no tienes compras registradas.";return}
+ orders.forEach(p=>{
+  const article=document.createElement("article");article.className="pedido";
+  const h=document.createElement("h3");h.textContent=p.sorteo+" · "+new Date(p.creado_en).toLocaleString("es-ES");article.append(h);
+  const lines=[
+   "Referencia de pedido: "+p.id,
+   "Cantidad: "+p.cantidad+" papeleta(s)",
+   "Importe: "+Number(p.total).toFixed(2)+" €",
+   "Estado del pago: "+p.estado,
+   "Forma de pago: "+(p.metodo_pago||"—"),
+   "Papeletas asignadas: "+(Array.isArray(p.numeros_papeletas)&&p.numeros_papeletas.length?p.numeros_papeletas.map(n=>String(n).padStart(4,"0")).join(", "):"Pendientes de confirmación"),
+   "Número de seguimiento: "+(p.codigo_seguimiento||"Pendiente de generación"),
+   "Papeleta en papel solicitada: "+(p.solicitar_papel?"Sí":"No")
+  ];
+  lines.forEach(t=>{const d=document.createElement("p");d.className="dato";d.textContent=t;article.append(d)});
+  if(p.codigo_seguimiento){const a=document.createElement("a");a.className="btn";a.target="_blank";a.rel="noopener";a.href="https://script.google.com/macros/s/AKfycbw6E_cldHlYzbWADdavE55xu5vBrLFWBlFmpBPx3aosLMNaRHXXQr997A5RsLmRNH8/exec?codigo="+encodeURIComponent(p.codigo_seguimiento);a.textContent="Consultar seguimiento";article.append(a)}
+  box.append(article);
+ });
+ const {data:msgs,error:me}=await db.from("mensajes_clientes").select("asunto,mensaje,tipo,creado_en").order("creado_en",{ascending:false});
+ const mb=$("mensajes");mb.replaceChildren();
+ if(me){mb.textContent="No se pudieron cargar los mensajes.";return}
+ if(!msgs?.length){mb.textContent="No tienes mensajes nuevos.";return}
+ msgs.forEach(m=>{const a=document.createElement("article");a.className="pedido";const h=document.createElement("h3");h.textContent=(m.tipo==="oferta"?"🏷️ ":m.tipo==="promocion"?"🎁 ":"💬 ")+m.asunto;const p=document.createElement("p");p.textContent=m.mensaje;const f=document.createElement("small");f.textContent=new Date(m.creado_en).toLocaleString("es-ES");a.append(h,p,f);mb.append(a)});
+}
+db.auth.onAuthStateChange(()=>{setTimeout(routeSession,0)});routeSession();
+})();
+</script></body></html>

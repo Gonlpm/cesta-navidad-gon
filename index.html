@@ -226,13 +226,10 @@ async function actualizarSesionCliente() {
     window.location.replace("admin.html");
     return;
   }
-  if (session && session.user) {
-    window.location.replace("cliente.html");
-    return;
-  }
+  
   accesoCliente.style.display = session ? "none" : "block";
   sesionCliente.style.display = session ? "block" : "none";
-  pedidoForm.style.display = "none";
+  pedidoForm.style.display = session ? "block" : "none";
   document.getElementById("panelCliente").style.display = "none";
   document.getElementById("correoCliente").textContent =
     session && session.user ? session.user.email : "";

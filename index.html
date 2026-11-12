@@ -125,6 +125,19 @@ Tu pedido quedará pendiente hasta que se compruebe el pago.</p>
 <p>Sesión de cliente iniciada: <strong id="correoCliente"></strong></p>
 <button type="button" id="salirCliente" class="verde">CERRAR SESIÓN</button>
 </div>
+<div id="panelCliente" style="display:none">
+<div class="card">
+<h3>👤 Mi ficha de cliente</h3>
+<p><strong>Código GON:</strong> <span id="miCodigo">Cargando...</span></p>
+<p><strong>Nombre:</strong> <span id="miNombre">Cargando...</span></p>
+<p><strong>Correo:</strong> <span id="miCorreo">Cargando...</span></p>
+<a class="boton verde" href="https://script.google.com/macros/s/AKfycbw6E_cldHlYzbWADdavE55xu5vBrLFWBlFmpBPx3aosLMNaRHXXQr997A5RsLmRNH8/exec" target="_blank" rel="noopener">📦 VER SEGUIMIENTO DE MIS PEDIDOS</a>
+</div>
+<div class="card">
+<h3>💬 Mensajes, ofertas y promociones</h3>
+<div id="bandejaMensajes">Cargando mensajes...</div>
+</div>
+</div>
 <form id="pedidoForm" style="display:none">
 <input type="hidden" id="sorteo" value="Chopera 55">
 
@@ -206,8 +219,68 @@ async function actualizarSesionCliente() {
   accesoCliente.style.display = session ? "none" : "block";
   sesionCliente.style.display = session ? "block" : "none";
   pedidoForm.style.display = session ? "block" : "none";
+  document.getElementById("panelCliente").style.display = session ? "block" : "none";
   document.getElementById("correoCliente").textContent =
     session && session.user ? session.user.email : "";
+  if (session) {
+    await cargarFichaYMensajes();
+  } else {
+    document.getElementById("miCodigo").textContent = "—";
+    document.getElementById("miNombre").textContent = "—";
+    document.getElementById("miCorreo").textContent = "—";
+    document.getElementById("bandejaMensajes").textContent = "Inicia sesión para ver tus mensajes.";
+  }
+}
+
+async function cargarFichaYMensajes() {
+  const ficha = document.getElementById("miCodigo");
+  const bandeja = document.getElementById("bandejaMensajes");
+  const { data: userData } = await supabaseClient.auth.getUser();
+  if (!userData.user) return;
+  const { data: cliente, error: errorCliente } = await supabaseClient
+    .from("clientes")
+    .select("codigo_cliente,nombre,apellidos,email")
+    .eq("auth_user_id", userData.user.id)
+    .eq("activo", true)
+    .maybeSingle();
+  if (errorCliente) {
+    ficha.textContent = "No se pudo cargar la ficha";
+    return;
+  }
+  if (!cliente) {
+    ficha.textContent = "Cuenta aún no vinculada a un código GON";
+    document.getElementById("miNombre").textContent = "Pendiente de vinculación";
+    document.getElementById("miCorreo").textContent = userData.user.email || "";
+  } else {
+    ficha.textContent = cliente.codigo_cliente;
+    document.getElementById("miNombre").textContent = [cliente.nombre,cliente.apellidos].filter(Boolean).join(" ") || "—";
+    document.getElementById("miCorreo").textContent = cliente.email;
+  }
+  const { data: mensajes, error: errorMensajes } = await supabaseClient
+    .from("mensajes_clientes")
+    .select("id,asunto,mensaje,tipo,creado_en,leido_en")
+    .order("creado_en",{ascending:false});
+  if (errorMensajes) {
+    bandeja.textContent = "No se pudieron cargar los mensajes.";
+    return;
+  }
+  bandeja.replaceChildren();
+  if (!mensajes || mensajes.length === 0) {
+    bandeja.textContent = "Todavía no tienes mensajes.";
+    return;
+  }
+  mensajes.forEach(function(m) {
+    const item = document.createElement("article");
+    item.style.cssText = "background:#fffaf0;border:1px solid #eadfc9;border-radius:9px;padding:12px;margin:10px 0";
+    const titulo = document.createElement("strong");
+    titulo.textContent = (m.tipo === "oferta" ? "🏷️ " : m.tipo === "promocion" ? "🎁 " : "💬 ") + m.asunto;
+    const fecha = document.createElement("small");
+    fecha.textContent = new Date(m.creado_en).toLocaleString("es-ES");
+    const texto = document.createElement("p");
+    texto.textContent = m.mensaje;
+    item.append(titulo,fecha,texto);
+    bandeja.appendChild(item);
+  });
 }
 
 document.getElementById("loginCliente").addEventListener("submit", async function(e) {

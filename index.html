@@ -80,9 +80,12 @@ que forman parte de cada cesta.</p>
 
 <div class="card">
 <h3>🎄 C/ Pez Austral 14</h3>
-<p>Segundo sorteo independiente.</p>
-<p>Su configuración se publicará próximamente.</p>
-<button class="verde" onclick="alert('Este sorteo estará disponible próximamente.')">Próximamente</button>
+<p>Premio: Cesta de Navidad</p>
+<p class="precio">2 € por papeleta</p>
+<p>1.000 papeletas disponibles inicialmente.</p>
+<p>Fecha del sorteo: 24 de diciembre de 2026.</p>
+<p>Pagos: Bizum y efectivo.</p>
+<button class="verde" onclick="seleccionarSorteo('C/ Pez Austral 14')">Ver este sorteo</button>
 </div>
 </div>
 </section>
@@ -363,6 +366,11 @@ actualizarSesionCliente();
 // PRODUCTOS
 const productosChopera = [];
 const productosPez = [];
+const CONFIGURACION_SORTEOS = {
+  "Chopera 55": { precio: 2, maximo: 1000, pagos: ["Bizum", "Efectivo"], fecha: "25 de diciembre de 2026" },
+  "C/ Pez Austral 14": { precio: 2, maximo: 1000, pagos: ["Bizum", "Efectivo"], fecha: "24 de diciembre de 2026" }
+};
+let precioActual = CONFIGURACION_SORTEOS["Chopera 55"].precio;
 
 function mostrarProductos(lista, contenedorId) {
   const contenedor = document.getElementById(contenedorId);
@@ -399,17 +407,27 @@ mostrarProductos(productosPez, "productos-pez");
 
 // SELECCIONAR SORTEO
 window.seleccionarSorteo = function(nombre) {
-  if (nombre !== "Chopera 55") {
-    alert("Este sorteo todavía no está disponible para compras.");
+  const config = CONFIGURACION_SORTEOS[nombre];
+  if (!config) {
+    alert("Este sorteo no está disponible.");
     return;
   }
-
+  precioActual = config.precio;
   document.getElementById("sorteo").value = nombre;
-  document.getElementById("tituloCompra").textContent = "Sorteo: " + nombre;
-
-  document.getElementById("comprar").scrollIntoView({
-    behavior: "smooth"
+  document.getElementById("tituloCompra").textContent =
+    "Sorteo: " + nombre + " · " + config.fecha;
+  cantidadInput.max = String(config.maximo);
+  const pago = document.getElementById("pago");
+  pago.replaceChildren();
+  config.pagos.forEach(function(metodo) {
+    const opcion = document.createElement("option");
+    opcion.value = metodo;
+    opcion.textContent = metodo;
+    pago.appendChild(opcion);
   });
+  cantidadInput.value = "1";
+  actualizarTotal();
+  document.getElementById("comprar").scrollIntoView({behavior:"smooth"});
 };
 
 // CALCULAR TOTAL
@@ -420,10 +438,11 @@ function actualizarTotal() {
   let cantidad = Number(cantidadInput.value);
 
   if (!Number.isInteger(cantidad) || cantidad < 1) cantidad = 1;
-  if (cantidad > 1000) cantidad = 1000;
+  const maximo = Number(cantidadInput.max) || 1000;
+  if (cantidad > maximo) cantidad = maximo;
 
   totalTexto.textContent =
-    (cantidad * 2).toFixed(2).replace(".", ",") + " €";
+    (cantidad * precioActual).toFixed(2).replace(".", ",") + " €";
 }
 
 cantidadInput.addEventListener("input", actualizarTotal);
@@ -442,8 +461,9 @@ document.getElementById("pedidoForm").addEventListener("submit", async function(
   }
   const cantidad = Number(cantidadInput.value);
 
-  if (!Number.isInteger(cantidad) || cantidad < 1 || cantidad > 1000) {
-    alert("Introduce una cantidad entre 1 y 1.000.");
+  const maximoSorteo = CONFIGURACION_SORTEOS[document.getElementById("sorteo").value].maximo;
+  if (!Number.isInteger(cantidad) || cantidad < 1 || cantidad > maximoSorteo) {
+    alert("Introduce una cantidad entre 1 y " + maximoSorteo + ".");
     return;
   }
 

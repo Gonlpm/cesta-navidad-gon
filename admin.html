@@ -132,6 +132,24 @@ th{background:#f0eee6}
 </div>
 
 <div class="card">
+<h2>🎟️ Control de papeletas — C/ Pez Austral 14</h2>
+<p>Total de papeletas: <strong>1.000</strong> · Precio: <strong>2 €</strong> · Sorteo: <strong>24/12/2026</strong></p>
+<div class="contadores">
+<div class="contador"><h3>TOTAL</h3><div class="numero">1.000</div></div>
+<div class="contador reservadas"><h3>RESERVADAS</h3><div class="numero" id="pezReservadas">—</div></div>
+<div class="contador"><h3>VENDIDAS</h3><div class="numero" id="pezVendidas">—</div></div>
+<div class="contador disponibles"><h3>DISPONIBLES</h3><div class="numero" id="pezDisponibles">—</div></div>
+</div>
+<div class="estado-contador">
+<div class="estado-caja">Pendientes<strong id="pezPendientes">—</strong></div>
+<div class="estado-caja">Aprobados<strong id="pezAprobados">—</strong></div>
+<div class="estado-caja">Rechazados<strong id="pezRechazados">—</strong></div>
+</div>
+<div class="barra"><div id="pezBarraVendidas" class="barra-progreso"></div></div>
+<p id="pezPorcentajeVendidas" class="nota">Esperando datos...</p>
+</div>
+
+<div class="card">
 <h2>📋 Solicitudes de papeletas</h2>
 <p id="resumen">Cargando...</p>
 
@@ -193,31 +211,31 @@ alert(error.message||String(error));
 }
 
 function actualizarContador(data){
-const chopera=data.filter(p=>p.sorteo==="Chopera 55");
+function calcular(nombre,prefijo){
+const pedidos=data.filter(p=>p.sorteo===nombre);
 let reservadas=0,vendidas=0,pendientes=0,aprobados=0,rechazados=0;
-
-chopera.forEach(p=>{
+pedidos.forEach(p=>{
 const cantidad=Number(p.cantidad);
 if(!Number.isFinite(cantidad)||cantidad<0)throw new Error("Cantidad no válida.");
-
 if(p.estado==="pendiente"){pendientes++;reservadas+=cantidad;}
 else if(p.estado==="aprobado"){aprobados++;vendidas+=cantidad;}
 else if(p.estado==="rechazado"){rechazados++;}
 });
-
 const disponibles=TOTAL_PAPELETAS-reservadas-vendidas;
-if(disponibles<0)throw new Error("Se supera el límite de 1.000 papeletas.");
-
-document.getElementById("reservadas").textContent=reservadas;
-document.getElementById("vendidas").textContent=vendidas;
-document.getElementById("disponibles").textContent=disponibles;
-document.getElementById("pedidosPendientes").textContent=pendientes;
-document.getElementById("pedidosAprobados").textContent=aprobados;
-document.getElementById("pedidosRechazados").textContent=rechazados;
-
+if(disponibles<0)throw new Error("Se supera el límite de 1.000 papeletas en "+nombre+".");
+const id=(s)=>document.getElementById(prefijo+s);
+id("Reservadas").textContent=reservadas;
+id("Vendidas").textContent=vendidas;
+id("Disponibles").textContent=disponibles;
+id("Pendientes").textContent=pendientes;
+id("Aprobados").textContent=aprobados;
+id("Rechazados").textContent=rechazados;
 const porcentaje=vendidas/TOTAL_PAPELETAS*100;
-document.getElementById("barraVendidas").style.width=porcentaje+"%";
-document.getElementById("porcentajeVendidas").textContent=porcentaje.toFixed(1)+"% vendidas.";
+id("BarraVendidas").style.width=porcentaje+"%";
+id("PorcentajeVendidas").textContent=porcentaje.toFixed(1)+"% vendidas.";
+}
+calcular("Chopera 55","");
+calcular("C/ Pez Austral 14","pez");
 }
 
 function mostrarPanel(usuario){
@@ -371,7 +389,7 @@ crearCelda(fila,p.solicitar_papel?"Sí":"No");
 const acciones=crearCelda(fila,"");
 acciones.className="acciones";
 
-if(p.estado==="pendiente"&&p.sorteo==="Chopera 55"){
+if(p.estado==="pendiente"){
 crearBoton("APROBAR","",()=>aprobarPedido(p.id),acciones);
 crearBoton("RECHAZAR","rojo",()=>rechazarPedido(p.id),acciones);
 }

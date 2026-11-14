@@ -223,16 +223,24 @@ else if(p.estado==="rechazado"){rechazados++;}
 });
 const disponibles=TOTAL_PAPELETAS-reservadas-vendidas;
 if(disponibles<0)throw new Error("Se supera el límite de 1.000 papeletas en "+nombre+".");
-const id=(s)=>document.getElementById(prefijo+s);
-id("Reservadas").textContent=reservadas;
-id("Vendidas").textContent=vendidas;
-id("Disponibles").textContent=disponibles;
-id("Pendientes").textContent=pendientes;
-id("Aprobados").textContent=aprobados;
-id("Rechazados").textContent=rechazados;
+const ids=prefijo?{
+reservadas:"pezReservadas",vendidas:"pezVendidas",disponibles:"pezDisponibles",
+pendientes:"pezPendientes",aprobados:"pezAprobados",rechazados:"pezRechazados",
+barra:"pezBarraVendidas",porcentaje:"pezPorcentajeVendidas"
+}:{
+reservadas:"reservadas",vendidas:"vendidas",disponibles:"disponibles",
+pendientes:"pedidosPendientes",aprobados:"pedidosAprobados",rechazados:"pedidosRechazados",
+barra:"barraVendidas",porcentaje:"porcentajeVendidas"
+};
+document.getElementById(ids.reservadas).textContent=reservadas;
+document.getElementById(ids.vendidas).textContent=vendidas;
+document.getElementById(ids.disponibles).textContent=disponibles;
+document.getElementById(ids.pendientes).textContent=pendientes;
+document.getElementById(ids.aprobados).textContent=aprobados;
+document.getElementById(ids.rechazados).textContent=rechazados;
 const porcentaje=vendidas/TOTAL_PAPELETAS*100;
-id("BarraVendidas").style.width=porcentaje+"%";
-id("PorcentajeVendidas").textContent=porcentaje.toFixed(1)+"% vendidas.";
+document.getElementById(ids.barra).style.width=porcentaje+"%";
+document.getElementById(ids.porcentaje).textContent=porcentaje.toFixed(1)+"% vendidas.";
 }
 calcular("Chopera 55","");
 calcular("C/ Pez Austral 14","pez");

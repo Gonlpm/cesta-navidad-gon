@@ -8,7 +8,16 @@
 <main>
 <section id="acceso" class="card"><h2>🔐 Acceso de clientes</h2><p>Inicia sesión con el correo y la contraseña de tu cuenta.</p>
 <form id="login"><label>Correo electrónico</label><input id="email" type="email" autocomplete="username" required><label>Contraseña</label><input id="password" type="password" autocomplete="current-password" required><button id="entrar">INICIAR SESIÓN</button></form>
-<button id="recuperar">He olvidado mi contraseña</button><a class="btn" href="https://forms.gle/fAcr1N7vPBwVSmUH7" target="_blank" rel="noopener">Registrarme</a><p id="error" role="status"></p></section>
+<button id="recuperar">He olvidado mi contraseña</button>
+<details style="margin-top:18px"><summary style="cursor:pointer;font-weight:bold">Crear una cuenta nueva</summary>
+<form id="registro" style="margin-top:15px">
+<label>Nombre</label><input id="regNombre" maxlength="80" required>
+<label>Apellidos</label><input id="regApellidos" maxlength="100" required>
+<label>Teléfono</label><input id="regTelefono" type="tel" maxlength="25" required>
+<label>Correo electrónico</label><input id="regEmail" type="email" required>
+<label>Contraseña (mínimo 8 caracteres)</label><input id="regPassword" type="password" minlength="8" required>
+<button id="regBtn">CREAR CUENTA</button><p id="regMsg" role="status"></p>
+</form></details><p id="error" role="status"></p></section>
 <section id="panel" class="hidden">
 <div class="card"><h2>¡Bienvenido/a!</h2><p id="saludo"></p><p class="dato"><b>Código de cliente:</b> <span id="codigo">Cargando...</span></p><p class="dato"><b>Nombre:</b> <span id="nombre">—</span></p><p class="dato"><b>Correo:</b> <span id="correo">—</span></p><p class="dato"><b>Cuenta:</b> <span class="pill">Activa</span></p><button id="salir">Cerrar sesión</button></div>
 <div class="card"><h2>🎟️ Mis compras y papeletas</h2><p class="muted">Aquí puedes consultar el estado, tus números y el seguimiento individual de cada pedido.</p><div id="compras">Cargando...</div></div>
@@ -27,6 +36,25 @@ async function routeSession(){
  $("acceso").classList.add("hidden");$("panel").classList.remove("hidden");
  await loadPanel(session.user);
 }
+$("registro").addEventListener("submit",async e=>{
+ e.preventDefault();const b=$("regBtn"),m=$("regMsg");b.disabled=true;m.textContent="Creando cuenta...";
+ const nombre=$("regNombre").value.trim(),apellidos=$("regApellidos").value.trim(),telefono=$("regTelefono").value.trim(),email=$("regEmail").value.trim().toLowerCase(),password=$("regPassword").value;
+ try{
+  const {data,error}=await db.auth.signUp({email,password,options:{data:{nombre,apellidos,telefono}}});
+  if(error)throw error;
+  if(data.session){
+   const {error:pe}=await db.rpc("registrar_cliente",{p_nombre:nombre,p_apellidos:apellidos,p_telefono:telefono});
+   if(pe)throw pe;
+   m.textContent="Cuenta creada. Ya puedes entrar.";
+   await routeSession();
+  }else{
+   m.textContent="Cuenta creada. Confirma tu correo y después inicia sesión.";
+   $("email").value=email;
+  }
+  $("registro").reset();
+ }catch(err){m.textContent="No se pudo crear la cuenta: "+err.message}
+ finally{b.disabled=false}
+});
 $("login").addEventListener("submit",async e=>{
  e.preventDefault();$("entrar").disabled=true;showError("Comprobando...");
  const {data,error}=await db.auth.signInWithPassword({email:$("email").value.trim(),password:$("password").value});
@@ -44,11 +72,21 @@ $("salir").addEventListener("click",async()=>{await db.auth.signOut();await rout
 async function loadPanel(user){
  $("saludo").textContent="Sesión iniciada: "+(user.email||"");
  $("correo").textContent=user.email||"";
- const {data:c,error:ce}=await db.from("clientes").select("codigo_cliente,nombre,apellidos,email").eq("auth_user_id",user.id).eq("activo",true).maybeSingle();
+ let {data:c,error:ce}=await db.from("clientes").select("codigo_cliente,nombre,apellidos,email,telefono").eq("auth_user_id",user.id).eq("activo",true).maybeSingle();
  if(ce){$("codigo").textContent="No disponible";$("nombre").textContent=ce.message;return}
- if(!c){$("codigo").textContent="Pendiente de vinculación";$("nombre").textContent="Tu cuenta todavía no está vinculada a un registro GON.";return}
+ if(!c){
+  const meta=user.user_metadata||{};
+  if(meta.nombre&&meta.apellidos){
+   const {error:pe}=await db.rpc("registrar_cliente",{p_nombre:String(meta.nombre),p_apellidos:String(meta.apellidos),p_telefono:meta.telefono?String(meta.telefono):null});
+   if(pe){$("codigo").textContent="Pendiente de alta";$("nombre").textContent="No se pudo completar el registro: "+pe.message;return}
+   const again=await db.from("clientes").select("codigo_cliente,nombre,apellidos,email,telefono").eq("auth_user_id",user.id).eq("activo",true).maybeSingle();
+   c=again.data;ce=again.error;
+  }
+ }
+ if(ce){$("codigo").textContent="No disponible";$("nombre").textContent=ce.message;return}
+ if(!c){$("codigo").textContent="Pendiente de vinculación";$("nombre").textContent="No se encontró tu ficha de cliente.";return}
  $("codigo").textContent=c.codigo_cliente;$("nombre").textContent=[c.nombre,c.apellidos].filter(Boolean).join(" ");
- const {data:orders,error:oe}=await db.from("pedidos").select("id,sorteo,cantidad,total,estado,numeros_papeletas,codigo_seguimiento,creado_en,metodo_pago,solicitar_papel").eq("email",c.email).order("creado_en",{ascending:false});
+ const {data:orders,error:oe}=await db.from("pedidos").select("id,sorteo,cantidad,total,estado,numeros_papeletas,codigo_seguimiento,creado_en,metodo_pago,solicitar_papel").eq("auth_user_id",user.id).order("creado_en",{ascending:false});
  const box=$("compras");box.replaceChildren();
  if(oe){box.textContent="No se pudieron cargar las compras: "+oe.message;return}
  if(!orders?.length){box.textContent="Todavía no tienes compras registradas.";return}

@@ -273,18 +273,38 @@ async function cargarFichaYMensajes() {
     return;
   }
   if (!cliente) {
-    ficha.textContent = "Cuenta aún no vinculada a un código GON";
+    const meta = userData.user.user_metadata || {};
+    if (meta.nombre && meta.apellidos) {
+      const { error: altaError } = await supabaseClient.rpc("registrar_cliente", {
+        p_nombre: String(meta.nombre), p_apellidos: String(meta.apellidos),
+        p_telefono: meta.telefono ? String(meta.telefono) : null
+      });
+      if (!altaError) {
+        return cargarFichaYMensajes();
+      }
+      ficha.textContent = "No se pudo completar el alta: " + altaError.message;
+    } else {
+      ficha.textContent = "Cuenta aún no vinculada a un código GON";
+    }
     document.getElementById("miNombre").textContent = "Pendiente de vinculación";
     document.getElementById("miCorreo").textContent = userData.user.email || "";
   } else {
     ficha.textContent = cliente.codigo_cliente;
     document.getElementById("miNombre").textContent = [cliente.nombre,cliente.apellidos].filter(Boolean).join(" ") || "—";
     document.getElementById("miCorreo").textContent = cliente.email;
+    document.getElementById("nombre").value = [cliente.nombre,cliente.apellidos].filter(Boolean).join(" ");
+    document.getElementById("telefono").value = cliente.telefono || "";
+    document.getElementById("email").value = cliente.email || userData.user.email || "";
   }
-  const { data: mensajes, error: errorMensajes } = await supabaseClient
-    .from("mensajes_clientes")
+  let consultaMensajes = supabaseClient.from("mensajes_clientes")
     .select("id,asunto,mensaje,tipo,creado_en,leido_en")
     .order("creado_en",{ascending:false});
+  if (cliente) consultaMensajes = consultaMensajes.eq("codigo_cliente", cliente.codigo_cliente);
+  else {
+    bandeja.textContent = "Tu ficha de cliente todavía no está disponible.";
+    return;
+  }
+  const { data: mensajes, error: errorMensajes } = await consultaMensajes;
   if (errorMensajes) {
     bandeja.textContent = "No se pudieron cargar los mensajes.";
     return;

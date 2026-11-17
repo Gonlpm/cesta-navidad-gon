@@ -115,7 +115,16 @@ Tu pedido quedará pendiente hasta que se compruebe el pago.</p>
 <div id="accesoCliente" class="aviso">
 <h3>🔐 Acceso obligatorio de clientes</h3>
 <p>Para comprar papeletas primero debes registrarte en el formulario oficial y después iniciar sesión con el correo y la contraseña de tu cuenta de cliente.</p>
-<a class="boton" href="https://forms.gle/fAcr1N7vPBwVSmUH7" target="_blank" rel="noopener">📝 Registrarme</a>
+<form id="registroCliente" style="margin-top:18px">
+<h3>📝 Crear cuenta de cliente</h3>
+<label for="registroNombre">Nombre</label><input id="registroNombre" type="text" maxlength="80" autocomplete="given-name" required>
+<label for="registroApellidos">Apellidos</label><input id="registroApellidos" type="text" maxlength="100" autocomplete="family-name" required>
+<label for="registroTelefono">Teléfono</label><input id="registroTelefono" type="tel" maxlength="25" autocomplete="tel" required>
+<label for="registroEmail">Correo electrónico</label><input id="registroEmail" type="email" maxlength="150" autocomplete="email" required>
+<label for="registroPassword">Contraseña (mínimo 8 caracteres)</label><input id="registroPassword" type="password" minlength="8" autocomplete="new-password" required>
+<button type="submit" id="registroBtn" class="verde">CREAR CUENTA</button>
+<p id="registroMensaje" role="status"></p>
+</form>
 <form id="loginCliente" style="margin-top:18px">
 <label for="loginEmail">Correo electrónico registrado</label>
 <input id="loginEmail" type="email" autocomplete="email" required>
@@ -224,22 +233,22 @@ const loginMensaje = document.getElementById("loginMensaje");
 
 const ADMIN_ID = "68399dc3-5c6b-4705-b04a-eedcabb3bdb2";
 async function actualizarSesionCliente() {
-  const { data } = await supabaseClient.auth.getSession();
+  const { data, error } = await supabaseClient.auth.getSession();
+  if (error) { loginMensaje.textContent = "No se pudo comprobar la sesión."; return; }
   const session = data.session;
   if (session && session.user && session.user.id === ADMIN_ID) {
     window.location.replace("admin.html");
     return;
   }
-  
   accesoCliente.style.display = session ? "none" : "block";
   sesionCliente.style.display = session ? "block" : "none";
   pedidoForm.style.display = session ? "block" : "none";
-  document.getElementById("panelCliente").style.display = "none";
-  document.getElementById("correoCliente").textContent =
-    session && session.user ? session.user.email : "";
+  document.getElementById("panelCliente").style.display = session ? "block" : "none";
+  document.getElementById("correoCliente").textContent = session?.user?.email || "";
   if (session) {
-    accesoCliente.style.display = "block";
-    loginMensaje.textContent = "Abriendo tu panel...";
+    loginMensaje.textContent = "";
+    document.getElementById("email").value = session.user.email || "";
+    await cargarFichaYMensajes();
   } else {
     document.getElementById("miCodigo").textContent = "—";
     document.getElementById("miNombre").textContent = "—";
@@ -322,6 +331,39 @@ async function cargarFichaYMensajes() {
   }
 }
 
+document.getElementById("registroCliente").addEventListener("submit", async function(e) {
+  e.preventDefault();
+  const btn = document.getElementById("registroBtn");
+  const msg = document.getElementById("registroMensaje");
+  const nombre = document.getElementById("registroNombre").value.trim();
+  const apellidos = document.getElementById("registroApellidos").value.trim();
+  const telefono = document.getElementById("registroTelefono").value.trim();
+  const email = document.getElementById("registroEmail").value.trim().toLowerCase();
+  const password = document.getElementById("registroPassword").value;
+  btn.disabled = true; msg.textContent = "Creando tu cuenta...";
+  try {
+    const { data, error } = await supabaseClient.auth.signUp({
+      email, password,
+      options: { data: { nombre, apellidos, telefono } }
+    });
+    if (error) throw error;
+    if (data.session) {
+      const { error: perfilError } = await supabaseClient.rpc("registrar_cliente", {
+        p_nombre: nombre, p_apellidos: apellidos, p_telefono: telefono
+      });
+      if (perfilError) throw perfilError;
+      msg.textContent = "Cuenta creada. Ya puedes realizar tu pedido.";
+      await actualizarSesionCliente();
+    } else {
+      msg.textContent = "Cuenta creada. Revisa tu correo y confirma la dirección antes de iniciar sesión.";
+      document.getElementById("loginEmail").value = email;
+    }
+    document.getElementById("registroCliente").reset();
+  } catch (error) {
+    msg.textContent = "No se pudo crear la cuenta: " + error.message;
+  } finally { btn.disabled = false; }
+});
+
 document.getElementById("loginCliente").addEventListener("submit", async function(e) {
   e.preventDefault();
   const btn = document.getElementById("loginBtn");
@@ -337,8 +379,10 @@ document.getElementById("loginCliente").addEventListener("submit", async functio
     return;
   }
   loginMensaje.textContent = "";
-  const { data: usuario } = await supabaseClient.auth.getUser();
-  window.location.replace(usuario.user && usuario.user.id === ADMIN_ID ? "admin.html" : "clientes.html");
+  await actualizarSesionCliente();
+  if (document.getElementById("panelCliente").style.display === "block") {
+    document.getElementById("pedidoForm").scrollIntoView({behavior:"smooth"});
+  }
 });
 
 document.getElementById("recuperarBtn").addEventListener("click", async function() {

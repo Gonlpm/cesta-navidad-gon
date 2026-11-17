@@ -264,7 +264,7 @@ async function cargarFichaYMensajes() {
   if (!userData.user) return;
   const { data: cliente, error: errorCliente } = await supabaseClient
     .from("clientes")
-    .select("codigo_cliente,nombre,apellidos,email")
+    .select("codigo_cliente,nombre,apellidos,email,telefono")
     .eq("auth_user_id", userData.user.id)
     .eq("activo", true)
     .maybeSingle();

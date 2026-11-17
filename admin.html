@@ -101,6 +101,23 @@ th{background:#f0eee6}
 <p id="estadoMensajeCliente" role="status"></p>
 </div>
 
+<div class="card" id="gestionEntregas">
+<h2>🚚 Calendario de entregas</h2>
+<p>Organiza las entregas de pedidos confirmados. Solo el administrador puede ver y modificar esta agenda.</p>
+<form id="formEntrega">
+<label for="entregaTitulo">Título</label><input id="entregaTitulo" required maxlength="150" placeholder="Ej. Entrega pedido Cesta de Navidad">
+<label for="entregaFecha">Fecha</label><input id="entregaFecha" type="date" required>
+<label for="entregaHora">Hora (opcional)</label><input id="entregaHora" type="time">
+<label for="entregaDireccion">Dirección</label><input id="entregaDireccion" maxlength="250">
+<label for="entregaCliente">Cliente</label><input id="entregaCliente" maxlength="150">
+<label for="entregaTelefono">Teléfono</label><input id="entregaTelefono" type="tel" maxlength="30">
+<label for="entregaDescripcion">Notas</label><textarea id="entregaDescripcion" rows="3" style="width:100%;padding:12px;border:1px solid #ccc;border-radius:7px"></textarea>
+<button type="submit" class="verde">➕ AÑADIR ENTREGA</button>
+</form>
+<p id="estadoEntregas" role="status"></p>
+<div id="listaEntregas">Cargando entregas...</div>
+</div>
+
 <div class="card">
 <h2>🎟️ Control de papeletas — Chopera 55</h2>
 <p>Total de papeletas: <strong>1.000</strong></p>
@@ -324,6 +341,56 @@ prompt("Copia este número de justificante:",codigo);
 }
 }
 
+async function cargarEntregas(){
+ const box=document.getElementById("listaEntregas"),status=document.getElementById("estadoEntregas");
+ box.textContent="Cargando entregas...";
+ const {data,error}=await db.from("entregas").select("*").order("fecha_entrega",{ascending:true}).order("hora_entrega",{ascending:true});
+ if(error){box.textContent="No se pudieron cargar las entregas: "+error.message;return}
+ box.replaceChildren();
+ if(!data?.length){box.textContent="Todavía no hay entregas programadas.";return}
+ data.forEach(item=>{
+  const article=document.createElement("article");
+  article.style.cssText="border:1px solid #e5e0d4;border-radius:9px;padding:14px;margin:12px 0;background:#fffdf8";
+  const h=document.createElement("h3");h.textContent=item.titulo;
+  const info=document.createElement("p");
+  info.textContent=new Date(item.fecha_entrega+"T12:00:00").toLocaleDateString("es-ES")+(item.hora_entrega?" · "+String(item.hora_entrega).slice(0,5):" · Hora pendiente")+" · "+(item.direccion||"Dirección pendiente");
+  const who=document.createElement("p");who.textContent="Cliente: "+(item.cliente||"—")+" · Teléfono: "+(item.telefono||"—");
+  const notes=document.createElement("p");notes.textContent=item.descripcion||"";
+  const select=document.createElement("select");
+  select.style.cssText="padding:10px;border:1px solid #ccc;border-radius:7px";
+  ["pendiente","preparada","entregada","cancelada"].forEach(v=>{const o=document.createElement("option");o.value=v;o.textContent=v[0].toUpperCase()+v.slice(1);select.appendChild(o)});
+  select.value=item.estado;
+  select.addEventListener("change",async()=>{
+   select.disabled=true;
+   const {error:updateError}=await db.from("entregas").update({estado:select.value,actualizado_en:new Date().toISOString()}).eq("id",item.id);
+   select.disabled=false;
+   if(updateError){status.textContent="No se pudo actualizar: "+updateError.message;select.value=item.estado}
+   else{item.estado=select.value;status.textContent="Estado actualizado."}
+  });
+  article.append(h,info,who,notes,select);box.appendChild(article);
+ });
+ status.textContent=data.length+" entrega(s) en la agenda.";
+}
+document.getElementById("formEntrega").addEventListener("submit",async e=>{
+ e.preventDefault();const btn=e.submitter;btn.disabled=true;
+ const payload={
+  titulo:document.getElementById("entregaTitulo").value.trim(),
+  fecha_entrega:document.getElementById("entregaFecha").value,
+  hora_entrega:document.getElementById("entregaHora").value||null,
+  direccion:document.getElementById("entregaDireccion").value.trim()||null,
+  cliente:document.getElementById("entregaCliente").value.trim()||null,
+  telefono:document.getElementById("entregaTelefono").value.trim()||null,
+  descripcion:document.getElementById("entregaDescripcion").value.trim()||null,
+  estado:"pendiente"
+ };
+ const {error}=await db.from("entregas").insert(payload);
+ btn.disabled=false;
+ if(error){document.getElementById("estadoEntregas").textContent="No se pudo guardar: "+error.message;return}
+ document.getElementById("formEntrega").reset();
+ document.getElementById("estadoEntregas").textContent="Entrega añadida correctamente.";
+ await cargarEntregas();
+});
+
 async function cargarPedidos(){
 tabla.innerHTML="";
 resumen.textContent="Cargando pedidos...";
@@ -345,6 +412,7 @@ const {data,error}=await db.from("pedidos")
 if(error)throw error;
 
 actualizarContador(data);
+await cargarEntregas();
 
 let pendientes=0,aprobados=0,rechazados=0;
 

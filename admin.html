@@ -65,9 +65,9 @@ th{background:#f0eee6}
 <hr style="border:0;border-top:1px solid #e5e0d4;margin:22px 0">
 <h3>🎟️ ¿Quieres participar en el sorteo?</h3>
 <p>También puedes registrarte como cliente o ir a la página de compra de papeletas.</p>
-<a href="https://forms.gle/fAcr1N7vPBwVSmUH7" target="_blank" rel="noopener" style="display:inline-block;padding:11px 14px;background:#245b91;color:white;text-decoration:none;border-radius:7px;margin:4px">📝 REGISTRARSE</a>
+<a href="clientes.html" style="display:inline-block;padding:11px 14px;background:#245b91;color:white;text-decoration:none;border-radius:7px;margin:4px">📝 REGISTRARSE</a>
 <a href="index.html#comprar" style="display:inline-block;padding:11px 14px;background:#16713c;color:white;text-decoration:none;border-radius:7px;margin:4px">🎟️ ENTRAR A COMPRAR PAPELETAS</a>
-<p class="nota">El registro utiliza el formulario oficial de Google. El acceso de cliente con código GON y contraseña se habilitará cuando terminemos la conexión con Supabase Auth.</p>
+<p class="nota">El registro de clientes se realiza desde la página de clientes mediante Supabase Auth.</p>
 </section>
 
 <section id="panel" class="oculto">
@@ -76,7 +76,7 @@ th{background:#f0eee6}
 <h2>Bienvenido al panel de Gon 🎅</h2>
 <p id="sesion"></p>
 <a href="index.html#comprar" style="display:inline-block;padding:11px 14px;background:#16713c;color:white;text-decoration:none;border-radius:7px;margin:4px">🎟️ ENTRAR EN MI PANEL DE CLIENTE / COMPRAR</a>
-<a href="https://forms.gle/fAcr1N7vPBwVSmUH7" target="_blank" rel="noopener" style="display:inline-block;padding:11px 14px;background:#245b91;color:white;text-decoration:none;border-radius:7px;margin:4px">📝 REGISTRARSE</a>
+<a href="clientes.html" style="display:inline-block;padding:11px 14px;background:#245b91;color:white;text-decoration:none;border-radius:7px;margin:4px">📝 REGISTRARSE</a>
 <button id="actualizar" type="button">🔄 Actualizar pedidos</button>
 <button id="botonSalir" class="rojo" type="button">Cerrar sesión</button>
 <p id="mensajeGeneral"></p>
@@ -103,7 +103,7 @@ th{background:#f0eee6}
 
 <div class="card" id="gestionEntregas">
 <h2>🚚 Calendario de entregas</h2>
-<p>Organiza las entregas de pedidos confirmados. Solo el administrador puede ver y modificar esta agenda.</p>
+<p>Organiza las entregas de pedidos confirmados. Esta agenda se guarda en Supabase y solo la administra tu cuenta. La sincronización automática con Google Calendar aún no está conectada.</p><p><a href="https://calendar.google.com/calendar/u/0/r" target="_blank" rel="noopener">Abrir Google Calendar</a></p>
 <form id="formEntrega">
 <label for="entregaTitulo">Título</label><input id="entregaTitulo" required maxlength="150" placeholder="Ej. Entrega pedido Cesta de Navidad">
 <label for="entregaFecha">Fecha</label><input id="entregaFecha" type="date" required>

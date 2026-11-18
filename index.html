@@ -231,7 +231,7 @@ const sesionCliente = document.getElementById("sesionCliente");
 const pedidoForm = document.getElementById("pedidoForm");
 const loginMensaje = document.getElementById("loginMensaje");
 
-const ADMIN_ID = "68399dc3-5c6b-4705-b04a-eedcabb3bdb2";
+const ADMIN_ID = "cbcadeb7-e64d-4fe2-b903-1d38e6d34f4d";
 async function actualizarSesionCliente() {
   const { data, error } = await supabaseClient.auth.getSession();
   if (error) { loginMensaje.textContent = "No se pudo comprobar la sesión."; return; }

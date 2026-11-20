@@ -107,11 +107,26 @@ async function loadPanel(user){
   if(p.codigo_seguimiento){const a=document.createElement("a");a.className="btn";a.target="_blank";a.rel="noopener";a.href="https://script.google.com/macros/s/AKfycbw6E_cldHlYzbWADdavE55xu5vBrLFWBlFmpBPx3aosLMNaRHXXQr997A5RsLmRNH8/exec?codigo="+encodeURIComponent(p.codigo_seguimiento);a.textContent="Consultar seguimiento";article.append(a)}
   box.append(article);
  });
- const {data:msgs,error:me}=await db.from("mensajes_clientes").select("asunto,mensaje,tipo,creado_en").order("creado_en",{ascending:false});
- const mb=$("mensajes");mb.replaceChildren();
- if(me){mb.textContent="No se pudieron cargar los mensajes.";return}
- if(!msgs?.length){mb.textContent="No tienes mensajes nuevos.";return}
- msgs.forEach(m=>{const a=document.createElement("article");a.className="pedido";const h=document.createElement("h3");h.textContent=(m.tipo==="oferta"?"🏷️ ":m.tipo==="promocion"?"🎁 ":"💬 ")+m.asunto;const p=document.createElement("p");p.textContent=m.mensaje;const f=document.createElement("small");f.textContent=new Date(m.creado_en).toLocaleString("es-ES");a.append(h,p,f);mb.append(a)});
+ const mb=$("mensajes");
+ mb.textContent="Cargando tus mensajes...";
+ try {
+  const {data:msgs,error:me}=await db.from("mensajes_clientes")
+   .select("asunto,mensaje,tipo,creado_en")
+   .eq("codigo_cliente",c.codigo_cliente)
+   .order("creado_en",{ascending:false});
+  if(me) throw me;
+  mb.replaceChildren();
+  if(!msgs?.length){mb.textContent="Todavía no tienes mensajes. Cuando Gon te envíe uno, aparecerá aquí.";return}
+  msgs.forEach(m=>{
+   const a=document.createElement("article");a.className="pedido";
+   const h=document.createElement("h3");h.textContent=(m.tipo==="oferta"?"🏷️ ":m.tipo==="promocion"?"🎁 ":"💬 ")+m.asunto;
+   const p=document.createElement("p");p.textContent=m.mensaje;
+   const f=document.createElement("small");f.textContent=new Date(m.creado_en).toLocaleString("es-ES");
+   a.append(h,p,f);mb.append(a);
+  });
+ } catch(messageError) {
+  mb.textContent="No se pudieron cargar tus mensajes: "+messageError.message;
+ }
 }
 db.auth.onAuthStateChange(()=>{setTimeout(routeSession,0)});routeSession();
 })();

@@ -125,13 +125,6 @@ Tu pedido quedará pendiente hasta que se compruebe el pago.</p>
 <button type="submit" id="registroBtn" class="verde">CREAR CUENTA</button>
 <p id="registroMensaje" role="status"></p>
 </form>
-<form id="verificarCodigoForm" style="display:none;margin-top:18px">
-<label for="codigoOTP">Código de verificación de 6 cifras</label>
-<input id="codigoOTP" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" placeholder="123456" required>
-<button type="submit" id="verificarCodigoBtn" class="verde">VERIFICAR CÓDIGO</button>
-<p id="otpMensaje" role="status"></p>
-<button type="button" id="reenviarCodigoBtn">REENVIAR CÓDIGO</button>
-</form>
 <form id="loginCliente" style="margin-top:18px">
 <label for="loginEmail">Correo electrónico registrado</label>
 <input id="loginEmail" type="email" autocomplete="email" required>
@@ -306,33 +299,33 @@ async function cargarFichaYMensajes() {
   let consultaMensajes = supabaseClient.from("mensajes_clientes")
     .select("id,asunto,mensaje,tipo,creado_en,leido_en")
     .order("creado_en",{ascending:false});
-  if (cliente) consultaMensajes = consultaMensajes.eq("codigo_cliente", cliente.codigo_cliente);
-  else {
+  if (!cliente) {
     bandeja.textContent = "Tu ficha de cliente todavía no está disponible.";
-    return;
+  } else {
+    consultaMensajes = consultaMensajes.eq("codigo_cliente", cliente.codigo_cliente);
+    const { data: mensajes, error: errorMensajes } = await consultaMensajes;
+    if (errorMensajes) {
+      bandeja.textContent = "No se pudieron cargar los mensajes.";
+    } else {
+      bandeja.replaceChildren();
+      if (!mensajes || mensajes.length === 0) {
+        bandeja.textContent = "Todavía no tienes mensajes.";
+      } else {
+        mensajes.forEach(function(m) {
+          const item = document.createElement("article");
+          item.style.cssText = "background:#fffaf0;border:1px solid #eadfc9;border-radius:9px;padding:12px;margin:10px 0";
+          const titulo = document.createElement("strong");
+          titulo.textContent = (m.tipo === "oferta" ? "🏷️ " : m.tipo === "promocion" ? "🎁 " : "💬 ") + m.asunto;
+          const fecha = document.createElement("small");
+          fecha.textContent = new Date(m.creado_en).toLocaleString("es-ES");
+          const texto = document.createElement("p");
+          texto.textContent = m.mensaje;
+          item.append(titulo,fecha,texto);
+          bandeja.appendChild(item);
+        });
+      }
+    }
   }
-  const { data: mensajes, error: errorMensajes } = await consultaMensajes;
-  if (errorMensajes) {
-    bandeja.textContent = "No se pudieron cargar los mensajes.";
-    return;
-  }
-  bandeja.replaceChildren();
-  if (!mensajes || mensajes.length === 0) {
-    bandeja.textContent = "Todavía no tienes mensajes.";
-    return;
-  }
-  mensajes.forEach(function(m) {
-    const item = document.createElement("article");
-    item.style.cssText = "background:#fffaf0;border:1px solid #eadfc9;border-radius:9px;padding:12px;margin:10px 0";
-    const titulo = document.createElement("strong");
-    titulo.textContent = (m.tipo === "oferta" ? "🏷️ " : m.tipo === "promocion" ? "🎁 " : "💬 ") + m.asunto;
-    const fecha = document.createElement("small");
-    fecha.textContent = new Date(m.creado_en).toLocaleString("es-ES");
-    const texto = document.createElement("p");
-    texto.textContent = m.mensaje;
-    item.append(titulo,fecha,texto);
-    bandeja.appendChild(item);
-  });
 
   const compras = document.getElementById("misCompras");
   const { data: pedidos, error: errorPedidos } = await supabaseClient
@@ -359,8 +352,6 @@ async function cargarFichaYMensajes() {
   }
 }
 
-let registroPendiente = null;
-
 document.getElementById("registroCliente").addEventListener("submit", async function(e) {
   e.preventDefault();
   const btn = document.getElementById("registroBtn");
@@ -371,96 +362,28 @@ document.getElementById("registroCliente").addEventListener("submit", async func
   const email = document.getElementById("registroEmail").value.trim().toLowerCase();
   const password = document.getElementById("registroPassword").value;
   btn.disabled = true;
-  msg.textContent = "Creando tu cuenta y enviando el código de seis cifras...";
+  msg.textContent = "Creando tu cuenta...";
   try {
     const { data, error } = await supabaseClient.auth.signUp({
       email, password,
       options: { data: { nombre, apellidos, telefono } }
     });
     if (error) throw error;
-
-    if (data.session) {
-      const { error: perfilError } = await supabaseClient.rpc("registrar_cliente", {
-        p_nombre: nombre, p_apellidos: apellidos, p_telefono: telefono
-      });
-      if (perfilError) throw perfilError;
-      msg.textContent = "Cuenta creada y ficha GON registrada correctamente.";
-      document.getElementById("registroCliente").reset();
-      await actualizarSesionCliente();
-    } else {
-      registroPendiente = { email, nombre, apellidos, telefono };
-      document.getElementById("verificarCodigoForm").style.display = "block";
-      document.getElementById("codigoOTP").value = "";
-      document.getElementById("otpMensaje").textContent =
-        "Te hemos enviado un código de 6 cifras a " + email + ". Escríbelo aquí para activar tu cuenta.";
-      document.getElementById("loginEmail").value = email;
-      msg.textContent = "Revisa tu correo. El código solo se puede utilizar una vez.";
-      document.getElementById("codigoOTP").focus();
+    if (!data.session) {
+      throw new Error("Supabase no ha iniciado sesión automáticamente. Comprueba que Confirm email está desactivado y vuelve a intentarlo.");
     }
-  } catch (error) {
-    msg.textContent = "No se pudo crear la cuenta: " + error.message;
-  } finally {
-    btn.disabled = false;
-  }
-});
-
-document.getElementById("verificarCodigoForm").addEventListener("submit", async function(e) {
-  e.preventDefault();
-  const btn = document.getElementById("verificarCodigoBtn");
-  const msg = document.getElementById("otpMensaje");
-  const token = document.getElementById("codigoOTP").value.trim();
-  if (!registroPendiente) {
-    msg.textContent = "Vuelve a iniciar el registro para solicitar un código nuevo.";
-    return;
-  }
-  if (!/^[0-9]{6}$/.test(token)) {
-    msg.textContent = "Introduce las seis cifras del correo.";
-    return;
-  }
-  btn.disabled = true;
-  msg.textContent = "Comprobando el código...";
-  try {
-    const { data, error } = await supabaseClient.auth.verifyOtp({
-      email: registroPendiente.email,
-      token,
-      type: "signup"
-    });
-    if (error) throw error;
-    if (!data.session) throw new Error("El código se ha aceptado, pero no se ha creado la sesión. Inicia sesión con tu correo y contraseña.");
-
-    const { error: perfilError } = await supabaseClient.rpc("registrar_cliente", {
-      p_nombre: registroPendiente.nombre,
-      p_apellidos: registroPendiente.apellidos,
-      p_telefono: registroPendiente.telefono
+    const { data: codigo, error: perfilError } = await supabaseClient.rpc("registrar_cliente", {
+      p_nombre: nombre, p_apellidos: apellidos, p_telefono: telefono
     });
     if (perfilError) throw perfilError;
-
-    msg.textContent = "¡Correo verificado! Tu cuenta y tu Código GON están activos.";
+    msg.textContent = "¡Cuenta creada! Tu Código GON es " + codigo + ". Ya puedes entrar.";
     document.getElementById("registroCliente").reset();
-    document.getElementById("verificarCodigoForm").style.display = "none";
-    registroPendiente = null;
     await actualizarSesionCliente();
   } catch (error) {
-    msg.textContent = "No se pudo verificar el código: " + error.message;
+    msg.textContent = "No se pudo completar el registro: " + error.message;
   } finally {
     btn.disabled = false;
   }
-});
-
-document.getElementById("reenviarCodigoBtn").addEventListener("click", async function() {
-  const msg = document.getElementById("otpMensaje");
-  if (!registroPendiente) {
-    msg.textContent = "Vuelve a iniciar el registro para solicitar un código.";
-    return;
-  }
-  const { error } = await supabaseClient.auth.resend({
-    type: "signup",
-    email: registroPendiente.email,
-    options: { emailRedirectTo: window.location.origin + window.location.pathname }
-  });
-  msg.textContent = error
-    ? "No se pudo reenviar el código: " + error.message
-    : "Hemos solicitado un código nuevo. Revisa tu correo.";
 });
 
 document.getElementById("loginCliente").addEventListener("submit", async function(e) {

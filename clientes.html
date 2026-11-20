@@ -88,8 +88,8 @@ async function loadPanel(user){
  $("codigo").textContent=c.codigo_cliente;$("nombre").textContent=[c.nombre,c.apellidos].filter(Boolean).join(" ");
  const {data:orders,error:oe}=await db.from("pedidos").select("id,sorteo,cantidad,total,estado,numeros_papeletas,codigo_seguimiento,creado_en,metodo_pago,solicitar_papel").eq("auth_user_id",user.id).order("creado_en",{ascending:false});
  const box=$("compras");box.replaceChildren();
- if(oe){box.textContent="No se pudieron cargar las compras: "+oe.message;return}
- if(!orders?.length){box.textContent="Todavía no tienes compras registradas.";}
+ if(oe){box.textContent="No se pudieron cargar las compras: "+oe.message;}
+ else if(!orders?.length){box.textContent="Todavía no tienes compras registradas.";}
  else {
  orders.forEach(p=>{
   const article=document.createElement("article");article.className="pedido";

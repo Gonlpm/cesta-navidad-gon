@@ -89,7 +89,8 @@ async function loadPanel(user){
  const {data:orders,error:oe}=await db.from("pedidos").select("id,sorteo,cantidad,total,estado,numeros_papeletas,codigo_seguimiento,creado_en,metodo_pago,solicitar_papel").eq("auth_user_id",user.id).order("creado_en",{ascending:false});
  const box=$("compras");box.replaceChildren();
  if(oe){box.textContent="No se pudieron cargar las compras: "+oe.message;return}
- if(!orders?.length){box.textContent="Todavía no tienes compras registradas.";return}
+ if(!orders?.length){box.textContent="Todavía no tienes compras registradas.";}
+ else {
  orders.forEach(p=>{
   const article=document.createElement("article");article.className="pedido";
   const h=document.createElement("h3");h.textContent=p.sorteo+" · "+new Date(p.creado_en).toLocaleString("es-ES");article.append(h);
@@ -107,6 +108,7 @@ async function loadPanel(user){
   if(p.codigo_seguimiento){const a=document.createElement("a");a.className="btn";a.target="_blank";a.rel="noopener";a.href="https://script.google.com/macros/s/AKfycbw6E_cldHlYzbWADdavE55xu5vBrLFWBlFmpBPx3aosLMNaRHXXQr997A5RsLmRNH8/exec?codigo="+encodeURIComponent(p.codigo_seguimiento);a.textContent="Consultar seguimiento";article.append(a)}
   box.append(article);
  });
+ }
  const mb=$("mensajes");
  mb.textContent="Cargando tus mensajes...";
  try {

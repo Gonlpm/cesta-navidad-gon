@@ -101,6 +101,16 @@ th{background:#f0eee6}
 <p id="estadoMensajeCliente" role="status"></p>
 </div>
 
+<div class="card" id="consultaCliente">
+<h2>🔎 Consultar ficha completa por Código GON</h2>
+<p>Introduce un código de cliente para consultar su ficha disponible en Supabase y su historial de pedidos.</p>
+<label for="buscarCodigoCliente">Código de cliente</label>
+<input id="buscarCodigoCliente" placeholder="GON-0001" autocomplete="off">
+<button id="buscarFichaCliente" type="button" class="azul">🔍 BUSCAR CLIENTE</button>
+<p id="estadoConsultaCliente" role="status"></p>
+<div id="resultadoFichaCliente"></div>
+</div>
+
 <div class="card" id="gestionEntregas">
 <h2>🚚 Calendario de entregas</h2>
 <p>Organiza las entregas de pedidos confirmados. Esta agenda se guarda en Supabase y solo la administra tu cuenta. La sincronización automática con Google Calendar aún no está conectada.</p><p><a href="https://calendar.google.com/calendar/u/0/r" target="_blank" rel="noopener">Abrir Google Calendar</a></p>
@@ -582,6 +592,40 @@ document.getElementById("password").value="";
 loginMessage.textContent="Sesión cerrada.";
 }catch(error){mostrarError(error);}
 }
+
+document.getElementById("buscarFichaCliente").addEventListener("click",async function(){
+ const codigo=document.getElementById("buscarCodigoCliente").value.trim().toUpperCase();
+ const estado=document.getElementById("estadoConsultaCliente");
+ const resultado=document.getElementById("resultadoFichaCliente");
+ resultado.replaceChildren();
+ if(!/^GON-\\d{4,}$/.test(codigo)){estado.textContent="Introduce un código válido, por ejemplo GON-0001.";return;}
+ this.disabled=true;estado.textContent="Buscando ficha y pedidos...";
+ try{
+  const {data:cliente,error:ce}=await db.from("clientes").select("*").eq("codigo_cliente",codigo).maybeSingle();
+  if(ce)throw ce;
+  if(!cliente)throw new Error("No existe ningún cliente con ese código.");
+  const {data:pedidos,error:pe}=await db.from("pedidos").select("id,sorteo,nombre,telefono,email,cantidad,metodo_pago,total,estado,numeros_papeletas,solicitar_papel,creado_en,codigo_seguimiento").eq("auth_user_id",cliente.auth_user_id).order("creado_en",{ascending:false});
+  if(pe)throw pe;
+  const ficha=document.createElement("div");
+  const campos=[
+   ["Código GON",cliente.codigo_cliente],["Nombre",cliente.nombre],["Apellidos",cliente.apellidos],
+   ["Correo",cliente.email],["Teléfono",cliente.telefono],["Estado",cliente.activo?"Activo":"Inactivo"],
+   ["Fecha de alta",cliente.creado_en],["Última actualización",cliente.actualizado_en]
+  ];
+  campos.forEach(([k,v])=>{const p=document.createElement("p");p.textContent=k+": "+(v??"—");ficha.append(p)});
+  const titulo=document.createElement("h3");titulo.textContent="Historial de compras ("+(pedidos?.length||0)+")";ficha.append(titulo);
+  if(!pedidos?.length){const p=document.createElement("p");p.textContent="Este cliente todavía no tiene pedidos.";ficha.append(p)}
+  else pedidos.forEach(p=>{
+   const a=document.createElement("article");a.style.cssText="border:1px solid #e5e0d4;border-radius:8px;padding:12px;margin:10px 0";
+   const h=document.createElement("strong");h.textContent=p.sorteo+" · "+p.estado;a.append(h);
+   const d=document.createElement("p");d.textContent="Fecha: "+new Date(p.creado_en).toLocaleString("es-ES")+" · "+p.cantidad+" papeleta(s) · "+Number(p.total).toFixed(2)+" € · Pago: "+p.metodo_pago;a.append(d);
+   const n=document.createElement("p");n.textContent="Seguimiento: "+(p.codigo_seguimiento||"Pendiente")+" · Números: "+(p.numeros_papeletas?.join(", ")||"Pendientes");a.append(n);
+   ficha.append(a);
+  });
+  resultado.append(ficha);estado.textContent="Ficha encontrada.";
+ }catch(e){estado.textContent="No se pudo consultar: "+e.message}
+ finally{this.disabled=false}
+});
 
 document.getElementById("enviarMensajeCliente").addEventListener("click",async function(){
 const codigo=document.getElementById("destinatarioGON").value.trim().toUpperCase();
